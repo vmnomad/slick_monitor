@@ -1,15 +1,26 @@
-import subprocess
 
-class Stats:
-    def __init__(self, name):
+import subprocess
+from threading import Thread
+import time
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+
+class Stats(Thread):
+    def __init__(self, name, interval):
+        Thread.__init__(self)
+        self.daemon = True
         self.name = name
         self.pid = self.find_pid()
-    
+        self.interval = interval
+        self.memory_usage = ''
+        self.cpu_usage = ''
+
     def find_pid(self):
         try:
             output = subprocess.run(['ps'], stdout = subprocess.PIPE)
         except Exception as er:
-            print('failed to capture PID of', self.name)
+            print('failed to capture PID of', self.name, ', Error:', er)
             raise
 
         output = output.stdout.decode('utf-8')
@@ -41,6 +52,15 @@ class Stats:
             memory = round(float(memory), 2)
             return str(memory) + ' MB'
         else:
-            return err
+            return 'Error: ' + err
 
+    def cpu(self):
+        cpu_cli = 'ps -p {} -o %cpu'.format(self.pid).split(' ')
+        cpu_usage = subprocess.check_output(cpu_cli).decode('utf-8').strip().split()[1]
+        return str(cpu_usage.strip(' ')) + '%'
 
+    def run(self):
+        while True:
+            logging.info('CPU Usage: {}, Memory Usage: {}'.format(self.cpu(), self.memory()))
+            time.sleep(self.interval)
+            

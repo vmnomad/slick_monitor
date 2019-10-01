@@ -34,7 +34,7 @@ monitors1 = [
 
 monitors2 = [
     {
-        'id' : 0,
+        'id' : 1,
         'hostname' : 'google.com',
         'type' : 'ping',
         'params' : {
@@ -45,7 +45,7 @@ monitors2 = [
         }
     },
     {
-        'id' : 1,
+        'id' : 2,
         'hostname' : '4.4.4.4',
         'type' : 'ping',
         'params' : {
@@ -56,7 +56,7 @@ monitors2 = [
         }
     },
     {
-        'id' : 2,
+        'id' : 3,
         'hostname' : 'https://www.vmware.com',
         'type' : 'http',
         'params' : {
@@ -66,7 +66,7 @@ monitors2 = [
         }
     },
     {
-        'id' : 3,
+        'id' : 4,
         'hostname' : 'bbc.com',
         'type' : 'http',
         'params' : {

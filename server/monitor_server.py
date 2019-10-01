@@ -8,8 +8,12 @@ import logging
 
 import datetime
 
+
+# local modulues
 from Tests import Test_Factory
 from alerts import Alert_Factory
+from utils import Stats
+
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
@@ -26,6 +30,9 @@ monitors = shelfFile['monitors1']
 shelfFile.close()
 
 
+# initiate memory module
+server_stats = Stats(sys.argv[0], 5)
+server_stats.start()
 
 
 # main function starts here
@@ -84,7 +91,14 @@ class monitor_test(Thread):
             test_result = [self.status, self.result_info]
             q.put(test_result)
 
-            time.sleep(self.interval)
+            # improved wait timer for quicker thread stop
+            wait = 0
+            while wait < self.interval:
+                if self.alive == False:
+                    break
+                time.sleep(5)
+                wait += 5
+            #time.sleep(self.interval)
 
     def get_status(self):
         if self.status == True:
@@ -95,13 +109,8 @@ class monitor_test(Thread):
 
 threads = []
 
-# build
-
 
 # TODO add monitoring of threads and restart if needed
-
-# TODO add shutting down threads if monitor is removed from the config
-
 for monitor in monitors:
     
     # get config
@@ -121,9 +130,11 @@ for monitor in monitors:
 
 def manage_threads():
     id = 0
-    
     while True:
+        # temp config file reading
         shelfFile = shelve.open('config.txt')
+
+        # simulation of new monitors being added and removed
         if id > 10:
             monitors = shelfFile['monitors1']
         elif id > 5:
@@ -132,14 +143,14 @@ def manage_threads():
             monitors = shelfFile['monitors1']
         shelfFile.close()
 
-        print('Number of current monitors', len(monitors))
+        #print('Number of current monitors', len(monitors))
         thread_ids = [obj.id for obj in threads]
-        print('Number of current threads:', len(thread_ids))
+        #print('Number of current threads:', len(thread_ids))
         for monitor in monitors:
 
             # check if it is started
             if not monitor['id'] in thread_ids:
-                print(colored('Starting new thread for {}'.format(monitor['hostname']), 'red'))
+                logging.info(colored('Starting new thread for {}'.format(monitor['hostname']), 'red'))
                 new_thread = monitor_test(monitor)
                 threads.append(new_thread)
                 new_thread.start()
@@ -149,7 +160,7 @@ def manage_threads():
 
         for obj in threads:
             if not obj.id in monitor_ids:
-                print(colored('Stopping thread for {}'.format(obj.hostname), 'red'))
+                logging.info(colored('Stopping thread for {}'.format(obj.hostname), 'red'))
                 obj.alive = False
                 obj.join()
                 threads.remove(obj)     
@@ -162,22 +173,6 @@ thread_manager.daemon = True
 thread_manager.start()
 
 
-# getting memory stats
-def Memory():
-    stats_obj = stats.Stats(sys.argv[0])
-    while True:
-        logging.info(colored('Current Memory Usage: {}'.format(stats_obj.memory()), 'blue'))
-        time.sleep(10)
-
-thread_obj = Thread(target=Memory)
-thread_obj.daemon = True
-thread_obj.start()
-
-
-
-
-
-
 sleep_timer = 0
 while True:
     if not q.empty():
@@ -186,15 +181,6 @@ while True:
             logging.info(colored('{}'.format(message), 'green'))
         else:
             logging.info(colored('{}'.format(message), 'red'))
-    #print('number of threads: {}'.format(len(threading.enumerate())))
-
-    #if sleep_timer > 15:        
-    #    threads[0].alive = False
-    #    print('id: ', threads[0].id)
-    #    print(colored('Stopping thread', 'red'))
-    #    threads[0].join()
-    
-    #sleep_timer += 2
     time.sleep(2)
 
 
