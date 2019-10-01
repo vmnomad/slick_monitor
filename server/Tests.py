@@ -39,8 +39,6 @@ class Ping_test(Test):
         try:
             response = check_output(self.cmd).decode('utf-8')
             config.result_info = 'Successful ping: {}, avg response time: {}'.format(self.hostname, Ping_test.get_avg_time(response))
-            #config.result_info = Ping_test.get_avg_time(response)
-            #logging.debug('Successful ping: {}, avg response time: {}'.format(self.hostname, config.result_info))
             config.status = True
             config.failed = 0
         except Exception as e:
@@ -91,6 +89,3 @@ class Test_Factory():
         #if typ == 'ping': return Ping_test()
         #if typ == 'http': return Http_test()
         return globals()[target_class](config)
-
-
-

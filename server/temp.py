@@ -1,4 +1,3 @@
-import pprint
 import shelve
 
 global_config = {
@@ -19,7 +18,21 @@ global_config = {
     }
 }
 
-monitors = [
+monitors1 = [
+    {
+        'id' : 0,
+        'hostname' : '1.1.1.1',
+        'type' : 'ping',
+        'params' : {
+            'interval' : 5,
+            'ftt' : 3,
+            'alert_type' : 'email',
+            'count' : 3
+        }
+    }
+]
+
+monitors2 = [
     {
         'id' : 0,
         'hostname' : 'google.com',
@@ -65,20 +78,15 @@ monitors = [
 ]
 
 
-monitors1 = [
-    {
-        'id' : 0,
-        'hostname' : '1.1.1.1',
-        'type' : 'ping',
-        'params' : {
-            'interval' : 5,
-            'ftt' : 3,
-            'alert_type' : 'email',
-            'count' : 3
-        }
-    }
-]
+shelfFile = shelve.open('config.txt')
+shelfFile['monitors1'] = monitors1
+shelfFile['monitors2'] = monitors2
+shelfFile['global_config'] = global_config
+shelfFile.close()
 
-with open('configs.py', 'w') as config_file:
-    config_file.write('global_config = ' + pprint.pformat(global_config) + '\n')
-    config_file.write('monitors = ' + pprint.pformat(monitors) + '\n')
+
+
+shelfFile = shelve.open('config.txt')
+print(shelfFile['global_config'])
+#print(list(shelfFile.values()))
+shelfFile.close()
