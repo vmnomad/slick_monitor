@@ -1,0 +1,105 @@
+from threading import Thread
+import time
+from termcolor import colored
+from subprocess import check_output
+from queue import Queue
+import logging
+from alerts import Email_alert, Alert_Factory
+import datetime
+
+from Tests import Test_Factory, Test_Factory, Ping_test
+
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+
+
+
+# main function starts here
+
+q = Queue(100)
+
+class ping_test(Thread):
+    def __init__(self, monitor):
+        Thread.__init__(self)
+        self.hostname = monitor['hostname']
+        self.type = monitor['type']
+        self.config = monitor['config']
+
+        # init 
+        self.status = False
+        self.interval = interval
+        self.failed = 0
+        self.ftt = ftt
+        self.daemon = True
+        self.error = ''
+        self.alert_time = datetime.datetime.now() - datetime.timedelta(days=1)
+        self.last_fail = 0
+
+
+    def __str__(self):
+        print('Ping test for', hostname)
+    
+
+
+    #def ping:
+
+    #def https
+
+    #def ssh
+
+    def run(self):
+        cmd = 'ping -c 1 -t 2 {}'.format(self.hostname).split(' ')
+        logging.debug('pinging %s' % self.hostname)
+        while True:
+            try:
+                response = check_output(cmd)
+                #print(f"Response: {response}".split("\n"))
+                self.status = True
+                self.failed = 0
+                #logging.debug('Successful ping of %s' % self.ip)
+            except Exception as e:
+                self.status = False
+                self.error = e
+                print("Error: {}".format(e))                
+                self.failed += 1
+                
+                alertObj = Alert_Factory()
+                alert = alertObj.create_alert(self.config['alert_type'], global_config)
+
+                if self.failed >= ftt:
+                    error = 'Sending email re ' + self.hostname + ' failed'
+                    q.put(error)
+                    self.last_fail = datetime.datetime.now()
+                    alert.fail(self)
+                else:
+                    q.put('Failed to ping', self.hostname)
+
+            time.sleep(self.interval)
+
+    def get_status(self):
+        if self.status == True:
+            return colored('Ping to {} was successful'.format(self.hostname), 'green')
+        else:
+            return colored('Ping to {} failed'.format(self.hostname), 'red')
+
+
+#threads = []
+for host in hosts:
+    
+    # get config
+
+    # create a thread
+    current = ping_test(host)
+    
+    # track threads
+    #threads.append(current)
+
+    # start a thread
+    current.start()
+
+while True:
+    if not q.empty():
+        print(q.get())
+    
+
+
+    
