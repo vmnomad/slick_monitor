@@ -1,15 +1,16 @@
-import configs
 import pprint
 import logging
 from subprocess import check_output
 import re
 import requests
 from termcolor import colored
+import paramiko
+import socket
 
 logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
-# get configuration
-#monitors_config = configs.monitors
 
+# disables Paramiko logging
+logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 class Test:
     def __init__(self, config):
@@ -42,12 +43,9 @@ class Ping_test(Test):
             config.status = True
             config.failed = 0
         except Exception as e:
-            config.status = False
-            config.result_info = e
-            logging.debug("Error: {}".format(e))                
+            config.result_info = e  
+            config.status = False       
             config.failed += 1
-            return False
-
 
 
 
@@ -78,14 +76,54 @@ class Http_test(Test):
             monitor.failed +=1
 
 
-class SSH_test:
-    pass
+class Ssh_test(Test):
+    def __init__(self, config):
+        super().__init__(config)    
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.cmd = 'ls'
+        self.timeout = 5
+        self.username = config.params['username']
+        self.password = config.params['password']      
+
+
+    def run(self, monitor):
+        try:
+            self.client.connect(hostname=self.hostname, username=self.username, password=self.password)
+            self.client.exec_command(self.cmd, self.timeout)
+            self.client.close()
+            monitor.result_info = 'Successful SSH connection to {}'.format(self.hostname)
+            monitor.status = True
+            monitor.failed = 0
+        except Exception as er:
+            monitor.result_info = 'Failed to connect with error: {}'.format(er)
+            monitor.failed += 1
+            monitor.status = False
+
+
+class Tcp_test(Test):
+    def __init__(self,config):
+        super().__init__(config)
+        self.port = config.params['port']
+        self.timeout = config.params['timeout']
+        self.conn_info = (self.hostname, self.port)
+
+    
+    def run(self, monitor):
+        try:
+            socket_conn = socket.create_connection(self.conn_info, timeout=self.timeout)
+            socket_conn.close()
+            monitor.result_info = 'Successful TCP connection to {}'.format(self.hostname)
+            monitor.status = True
+            monitor.failed = 0
+        except Exception as er:
+            monitor.result_info = 'Failed TCPto connect with error: {}'.format(er)
+            monitor.failed += 1
+            monitor.status = False
 
 
 class Test_Factory():
    def create_test(self, typ, config):
         logging.debug('Generating {} test'.format(typ))
         target_class = typ.capitalize() + '_test'
-        #if typ == 'ping': return Ping_test()
-        #if typ == 'http': return Http_test()
         return globals()[target_class](config)

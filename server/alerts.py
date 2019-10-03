@@ -1,14 +1,13 @@
 import smtplib
+import shelve
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
-import configs
 import pprint
 import logging
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
-# get configuration
-global_config = configs.global_config
+
 
 class Alert:
     def fail(self):

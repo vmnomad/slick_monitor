@@ -2,7 +2,11 @@
 import subprocess
 from threading import Thread
 import time
+import datetime
 import logging
+from termcolor import colored
+
+COLOR = 'yellow'
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
@@ -15,6 +19,7 @@ class Stats(Thread):
         self.interval = interval
         self.memory_usage = ''
         self.cpu_usage = ''
+        self.start_time = datetime.datetime.now()
 
     def find_pid(self):
         try:
@@ -59,8 +64,19 @@ class Stats(Thread):
         cpu_usage = subprocess.check_output(cpu_cli).decode('utf-8').strip().split()[1]
         return str(cpu_usage.strip(' ')) + '%'
 
+    def uptime(self):
+        current_time = datetime.datetime.now()
+        uptime = current_time - self.start_time
+        days = uptime.days
+        hours, seconds = divmod(uptime.seconds, 3600)
+        minutes, seconds = divmod(seconds, 60)
+        return '{} days, {} hours, {} minutes, {} seconds'.format(colored(days, COLOR), colored(hours, COLOR), colored(minutes, COLOR), colored(seconds, COLOR))
+
+
+
     def run(self):
         while True:
-            logging.info('CPU Usage: {}, Memory Usage: {}'.format(self.cpu(), self.memory()))
+            logging.info('CPU: {}, Mem: {}, Uptime: {}'.format(self.cpu(), self.memory(), self.uptime()))
             time.sleep(self.interval)
-            
+
+

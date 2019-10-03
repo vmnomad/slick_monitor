@@ -1,5 +1,6 @@
+import sys
+import shelve
 from threading import Thread
-import threading
 import time
 from termcolor import colored
 from subprocess import check_output
@@ -11,37 +12,33 @@ import datetime
 
 # local modulues
 from Tests import Test_Factory
-from alerts import Alert_Factory
-from utils import Stats
+from Alerts import Alert_Factory
+from Utils import Stats
 
+CONFIG_FILE = 'config'
+test_mode = True
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
-import stats
-import sys
-
-
-import shelve
-
 # config
-shelfFile = shelve.open('config.txt')
+shelfFile = shelve.open(CONFIG_FILE)
 global_config = shelfFile['global_config']
-monitors = shelfFile['monitors1']
+monitors = shelfFile['monitors2']
 shelfFile.close()
 
 
 # initiate memory module
-server_stats = Stats(sys.argv[0], 5)
+server_stats = Stats(sys.argv[0], 30)
 server_stats.start()
 
 
 # main function starts here
-
-#logging.debug(colored('Starting program {}'.format(sys.argv[0]), 'red'))
-
 q = Queue(100)
 
 class monitor_test(Thread):
+
+    alertObj = Alert_Factory()
+
     def __init__(self, monitor_specs):
         Thread.__init__(self)
         self.id = monitor_specs['id']
@@ -51,6 +48,7 @@ class monitor_test(Thread):
         self.ftt = monitor_specs['params']['ftt']
         self.interval = monitor_specs['params']['interval']
         self.params = monitor_specs['params']
+        self.alert = monitor_test.alertObj.create_alert(self.alert_type, global_config)
 
         # generic params 
         self.failed = 0
@@ -80,13 +78,13 @@ class monitor_test(Thread):
             # creating Alert
             #  TODO check if the alert config changed before recreating test obj  
             #  TODO if the alert hasn't changed no need to instantiate Test class              
-            alertObj = Alert_Factory()
-            alert = alertObj.create_alert(self.alert_type, global_config)
+            #alertObj = Alert_Factory()
+            #alert = alertObj.create_alert(self.alert_type, global_config)
 
             # sending Alert if needed
             if self.failed >= self.ftt:
                 self.last_fail = datetime.datetime.now()
-                alert.fail(self)
+                self.alert.fail(self)
 
             test_result = [self.status, self.result_info]
             q.put(test_result)
@@ -108,8 +106,6 @@ class monitor_test(Thread):
 
 
 threads = []
-
-
 # TODO add monitoring of threads and restart if needed
 for monitor in monitors:
     
@@ -126,26 +122,26 @@ for monitor in monitors:
     current.start()
 
 
-
-
-def manage_threads():
+def manage_threads(monitors):
     id = 0
     while True:
         # temp config file reading
-        shelfFile = shelve.open('config.txt')
+        
+        if test_mode == True:
+            shelfFile = shelve.open(CONFIG_FILE)
+            # simulation of new monitors being added and removed
+            if id > 30:
+                monitors = shelfFile['monitors1']
+            elif id > 15:
+                monitors = shelfFile['monitors2']
+            else:
+                monitors = shelfFile['monitors1']
+            shelfFile.close()
 
-        # simulation of new monitors being added and removed
-        if id > 10:
-            monitors = shelfFile['monitors1']
-        elif id > 5:
-            monitors = shelfFile['monitors2']
-        else:
-            monitors = shelfFile['monitors1']
-        shelfFile.close()
-
-        #print('Number of current monitors', len(monitors))
+        # get IDs of running threads
         thread_ids = [obj.id for obj in threads]
-        #print('Number of current threads:', len(thread_ids))
+
+        # loop through monitors are added
         for monitor in monitors:
 
             # check if it is started
@@ -168,12 +164,11 @@ def manage_threads():
         time.sleep(2)
         id += 1
 
-thread_manager = Thread(target=manage_threads)
+thread_manager = Thread(target=manage_threads, args=[monitors])
 thread_manager.daemon = True
 thread_manager.start()
 
 
-sleep_timer = 0
 while True:
     if not q.empty():
         status, message = q.get()
