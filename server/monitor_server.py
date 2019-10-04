@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %
 # config
 shelfFile = shelve.open(CONFIG_FILE)
 builtins.global_config = shelfFile['global_config']
-builtins.monitors = shelfFile['monitors2']
+builtins.monitors = shelfFile['monitors1']
 builtins.queue = Queue(100)
 shelfFile.close()
 

@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 import datetime
 import pprint
 import logging
+import requests
+import json
 #logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -62,10 +64,36 @@ Error Info: %s """ % (
                 monitor.alert_time = datetime.datetime.now()
 
             except Exception as er:
-                print('Failed to send email:', monitor.hostname, monitor.type, ', Error:', er)
+                logging.debug('Failed to send email:', monitor.hostname, monitor.type, ', Error:', er)
             
         else:
             logging.debug('Skipping email alert, alert interval has not expired yet')
+
+
+class Slack_alert(Alert):
+
+    def __init__(self, config):
+        self.webhook = config['webhook']
+        self.headers = {"Content-type": "application/json"}
+        self.alert_interval = config['alert_interval']
+
+    def fail(self, monitor):
+
+        # check if the alert interval elapsed
+        if (datetime.datetime.now() - monitor.alert_time).total_seconds() > self.alert_interval:
+            try:
+                data = {"text": monitor.result_info}
+                print(data)
+                #json_data = json.dumps(data)
+                #print(json_data)
+                request = requests.post(self.webhook, json=data, headers=self.headers)
+                if request.status_code != 200:
+                    raise 'Failed to send slack message. Status code: {}'.format(request.status_code)
+            except Exception as er:
+                print('Error: {}'.format(er))
+        else:
+            logging.debug('Skipping email alert, alert interval has not expired yet')
+        
 
 class Syslog_alert(Alert):
     # TODO

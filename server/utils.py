@@ -130,9 +130,12 @@ class Monitor_test(Thread):
             #alert = alertObj.create_alert(self.alert_type, global_config)
 
             # sending Alert if needed
-            if self.failed >= self.ftt:
-                self.last_fail = datetime.datetime.now()
-                self.alert.fail(self)
+            try:
+                if self.failed >= self.ftt:
+                    self.last_fail = datetime.datetime.now()
+                    self.alert.fail(self)
+            except Exception as er:
+                print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
 
             test_result = [self.status, self.result_info]
             queue.put(test_result)
@@ -177,7 +180,7 @@ class Thread_manager(Thread):
                         thread_monitors = shelfFile['monitors1']
                     shelfFile.close()
                 else:
-                    thread_monitors = shelfFile['monitors2']
+                    thread_monitors = shelfFile['monitors1']
                 
             # get IDs of running threads
             thread_ids = [obj.id for obj in self.threads]

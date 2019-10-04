@@ -42,7 +42,7 @@ class Ping_test(Test):
             config.status = True
             config.failed = 0
         except Exception as e:
-            config.result_info = e  
+            config.result_info = 'Failed ping: {}. Error: {}'.format(self.hostname, e)  
             config.status = False       
             config.failed += 1
 

@@ -15,18 +15,23 @@ global_config = {
     'syslog' : 
     {
         None
+    },
+    'slack' : 
+    {
+        'webhook' : 'https://hooks.slack.com/services/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',
+        'alert_interval' : 3600
     }
 }
 
 monitors1 = [
     {
         'id' : 0,
-        'hostname' : '1.1.1.1',
+        'hostname' : '4.4.4.4',
         'type' : 'ping',
         'params' : {
             'interval' : 5,
             'ftt' : 3,
-            'alert_type' : 'email',
+            'alert_type' : 'slack',
             'count' : 3
         }
     }
@@ -51,7 +56,7 @@ monitors2 = [
         'params' : {
             'interval' : 3,
             'ftt' : 3,
-            'alert_type' : 'email',
+            'alert_type' : 'slack',
             'count' : 3
         }
     },
