@@ -7,19 +7,14 @@ from subprocess import check_output
 from queue import Queue
 import logging
 import builtins
-
-
 import datetime
 
 
 # local modulues
-
 from Utils import Stats, Monitor_test, Thread_manager
 
-
-
 CONFIG_FILE = 'config'
-test_mode = True
+test_mode = False
 
 logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
 

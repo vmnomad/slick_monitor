@@ -62,7 +62,8 @@ monitors2 = [
         'params' : {
             'interval' : 10,
             'ftt' : 1,
-            'alert_type' : 'email'
+            'alert_type' : 'email',
+            'allowed_codes' : [200, 201]
         }
     },
     {
@@ -72,7 +73,8 @@ monitors2 = [
         'params' : {
             'interval' : 10,
             'ftt' : 3,
-            'alert_type' : 'email'
+            'alert_type' : 'email',
+            'allowed_codes' : [200, 201]
         }
     },
     {

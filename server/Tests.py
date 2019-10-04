@@ -53,6 +53,7 @@ class Http_test(Test):
     def __init__(self, config):
         super().__init__(config)
         self.normalize_url(self.hostname)
+        self.allowed_codes = config.params['allowed_codes']
 
     def normalize_url(self, url):
         if not re.match(r'^https*\:\/\/', url):
@@ -63,17 +64,18 @@ class Http_test(Test):
         try:
             request = requests.head(self.hostname)
             monitor.failed = 0
-            if request.status_code == 200:
+            if request.status_code in self.allowed_codes:
                 #logging.debug('Successful connection to {}'.format(self.hostname))
                 monitor.result_info = 'Successful connection to {}'.format(self.hostname)
                 monitor.status = True
             else:
-                monitor.result_info = 'Partially successful connection to {} with status code {}'.format(self.hostname, request.status_code)
+                monitor.result_info = 'The HTTP response code {} for {} is not allowed'.format(request.status_code, self.hostname)
                 monitor.status = False
 
         except requests.ConnectionError as er:
             monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)
             monitor.failed +=1
+            monitor.status = False
 
 
 class Ssh_test(Test):
