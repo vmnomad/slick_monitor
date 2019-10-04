@@ -1,4 +1,3 @@
-import pprint
 import logging
 from subprocess import check_output
 import re
@@ -53,24 +52,52 @@ class Http_test(Test):
     def __init__(self, config):
         super().__init__(config)
         self.normalize_url(self.hostname)
-        self.allowed_codes = config.params['allowed_codes']
+
+        if 'allowed_codes' in config.params:
+            self.allowed_codes = config.params['allowed_codes']
+        else:
+            self.allowed_codes = [200]
+
+        if 'regexp' in config.params:
+            self.regexp_text = config.params['regexp']
+            self.regexp = re.compile(self.regexp_text)
+        else:
+            self.regexp = None
+
+       
 
     def normalize_url(self, url):
         if not re.match(r'^https*\:\/\/', url):
             self.hostname = 'http://' + self.hostname 
     
     def run(self, monitor):
-        
+
         try:
-            request = requests.head(self.hostname)
-            monitor.failed = 0
-            if request.status_code in self.allowed_codes:
-                #logging.debug('Successful connection to {}'.format(self.hostname))
-                monitor.result_info = 'Successful connection to {}'.format(self.hostname)
-                monitor.status = True
+            if self.regexp == None: # no need to get page content if there is no regexp to look for
+                request = requests.head(self.hostname)
             else:
+                request = requests.get(self.hostname)
+            
+            if request.status_code not in self.allowed_codes:
                 monitor.result_info = 'The HTTP response code {} for {} is not allowed'.format(request.status_code, self.hostname)
                 monitor.status = False
+                monitor.failed += 1
+            else:
+                if self.regexp == None:
+                    monitor.result_info = 'Successful connection to {}. Status code {} is allowed.'.format(self.hostname, request.status_code)
+                    monitor.status = True
+                    monitor.failed = 0
+                else:
+                    matches = self.regexp.search(request.text, re.I)
+                    
+                    if matches:   
+                        monitor.result_info = 'Successful connection to {}. Status code {} is allowed and regexp "{}" has a match'.format(self.hostname, request.status_code, self.regexp_text)
+                        monitor.status = True
+                        monitor.failed = 0
+                    else:
+                        monitor.result_info = 'Failed to find regexp {} on {}'.format(self.regexp_text, self.hostname)
+                        monitor.status = False
+                        monitor.failed += 1
 
         except requests.ConnectionError as er:
             monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)

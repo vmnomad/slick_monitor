@@ -67,6 +67,18 @@ monitors2 = [
         }
     },
     {
+        'id' : 7,
+        'hostname' : 'https://automatetheboringstuff.com',
+        'type' : 'http',
+        'params' : {
+            'interval' : 10,
+            'ftt' : 1,
+            'alert_type' : 'email',
+            'allowed_codes' : [200, 201],
+            'regexp' : 'python'
+        }
+    },
+    {
         'id' : 4,
         'hostname' : 'bbc.com',
         'type' : 'http',
