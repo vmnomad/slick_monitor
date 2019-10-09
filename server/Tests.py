@@ -16,6 +16,17 @@ class Test:
         self.hostname = config.hostname
         self.ftt = config.params['ftt']
         self.interval = config.params['interval']
+    
+    @staticmethod
+    def set_result(obj,typ, message):
+        obj.result_info = message
+        if typ == 'success':
+            obj.status = True
+            obj.failed = 0
+        else:
+            obj.status = False
+            obj.failed += 1
+
 
 class Ping_test(Test):
 
@@ -38,13 +49,9 @@ class Ping_test(Test):
         # TODO - rework output
         try:
             response = check_output(self.cmd).decode('utf-8')
-            config.result_info = 'Successful ping: {}, avg response time: {}'.format(self.hostname, Ping_test.get_avg_time(response))
-            config.status = True
-            config.failed = 0
+            Ping_test.set_result(config, 'success', 'Successful ping: {}, avg response time: {}'.format(self.hostname, Ping_test.get_avg_time(response)))
         except Exception as e:
-            config.result_info = 'Failed ping: {}. Error: {}'.format(self.hostname, e)  
-            config.status = False       
-            config.failed += 1
+            Ping_test.set_result(config, 'fail', 'Failed ping: {}. Error: {}'.format(self.hostname, e))
 
 
 
@@ -79,25 +86,17 @@ class Http_test(Test):
                 request = requests.get(self.hostname)
             
             if request.status_code not in self.allowed_codes:
-                monitor.result_info = 'The HTTP response code {} for {} is not allowed'.format(request.status_code, self.hostname)
-                monitor.status = False
-                monitor.failed += 1
+                Ping_test.set_result(monitor, 'fail', 'The HTTP response code {} for {} is not allowed'.format(request.status_code, self.hostname))
             else:
                 if self.regexp == None:
-                    monitor.result_info = 'Successful connection to {}. Status code {} is allowed.'.format(self.hostname, request.status_code)
-                    monitor.status = True
-                    monitor.failed = 0
+                    Ping_test.set_result(monitor, 'success', 'Successful connection to {}. Status code {} is allowed.'.format(self.hostname, request.status_code))
                 else:
                     matches = self.regexp.search(request.text, re.I)
                     
                     if matches:   
-                        monitor.result_info = 'Successful connection to {}. Status code {} is allowed and regexp "{}" has a match'.format(self.hostname, request.status_code, self.regexp_text)
-                        monitor.status = True
-                        monitor.failed = 0
+                        Ping_test.set_result(monitor, 'success', 'Successful connection to {}. Status code {} is allowed and regexp "{}" has a match'.format(self.hostname, request.status_code, self.regexp_text))
                     else:
-                        monitor.result_info = 'Failed to find regexp {} on {}'.format(self.regexp_text, self.hostname)
-                        monitor.status = False
-                        monitor.failed += 1
+                        Ping_test.set_result(monitor, 'fail', 'Failed to find regexp {} on {}'.format(self.regexp_text, self.hostname))
 
         except requests.ConnectionError as er:
             monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)
@@ -121,13 +120,9 @@ class Ssh_test(Test):
             self.client.connect(hostname=self.hostname, username=self.username, password=self.password)
             self.client.exec_command(self.cmd, self.timeout)
             self.client.close()
-            monitor.result_info = 'Successful SSH connection to {}'.format(self.hostname)
-            monitor.status = True
-            monitor.failed = 0
+            Ping_test.set_result(monitor, 'success', 'Successful SSH connection to {}'.format(self.hostname))
         except Exception as er:
-            monitor.result_info = 'Failed to connect with error: {}'.format(er)
-            monitor.failed += 1
-            monitor.status = False
+            Ping_test.set_result(monitor, 'fail', 'Failed SSH connection with error: {}'.format(er))
 
 
 class Tcp_test(Test):
@@ -142,13 +137,9 @@ class Tcp_test(Test):
         try:
             socket_conn = socket.create_connection(self.conn_info, timeout=self.timeout)
             socket_conn.close()
-            monitor.result_info = 'Successful TCP connection to {}'.format(self.hostname)
-            monitor.status = True
-            monitor.failed = 0
+            Ping_test.set_result(monitor, 'success', 'Successful TCP connection to {}'.format(self.hostname))
         except Exception as er:
-            monitor.result_info = 'Failed TCPto connect with error: {}'.format(er)
-            monitor.failed += 1
-            monitor.status = False
+            Ping_test.set_result(monitor, 'fail', 'Failed TCP connection with error: {}'.format(er))
 
 
 class Test_Factory():

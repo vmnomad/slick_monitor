@@ -64,7 +64,7 @@ Error Info: %s """ % (
                 monitor.alert_time = datetime.datetime.now()
 
             except Exception as er:
-                logging.debug('Failed to send email:', monitor.hostname, monitor.type, ', Error:', er)
+                logging.debug('Failed to send email: {}, {}. Error: {}'.format(monitor.hostname, monitor.type, er))
             
         else:
             logging.debug('Skipping email alert, alert interval has not expired yet')
@@ -83,16 +83,15 @@ class Slack_alert(Alert):
         if (datetime.datetime.now() - monitor.alert_time).total_seconds() > self.alert_interval:
             try:
                 data = {"text": monitor.result_info}
-                print(data)
-                #json_data = json.dumps(data)
-                #print(json_data)
                 request = requests.post(self.webhook, json=data, headers=self.headers)
+                monitor.alert_time = datetime.datetime.now()
+
                 if request.status_code != 200:
                     raise 'Failed to send slack message. Status code: {}'.format(request.status_code)
             except Exception as er:
-                print('Error: {}'.format(er))
+                logging.debug('Failed to send slack alert. Error: {}'.format(er))
         else:
-            logging.debug('Skipping email alert, alert interval has not expired yet')
+            logging.debug('Skipping Slack alert, alert interval has not expired yet')
         
 
 class Syslog_alert(Alert):

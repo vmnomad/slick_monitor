@@ -137,6 +137,7 @@ class Monitor_test(Thread):
             except Exception as er:
                 print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
 
+            # passing result data to queue
             test_result = [self.status, self.result_info]
             queue.put(test_result)
 
@@ -147,7 +148,6 @@ class Monitor_test(Thread):
                     break
                 time.sleep(5)
                 wait += 5
-            #time.sleep(self.interval)
 
     def get_status(self):
         if self.status == True:
@@ -180,7 +180,7 @@ class Thread_manager(Thread):
                         thread_monitors = shelfFile['monitors1']
                     shelfFile.close()
                 else:
-                    thread_monitors = shelfFile['monitors1']
+                    thread_monitors = shelfFile['monitors2']
                 
             # get IDs of running threads
             thread_ids = [obj.id for obj in self.threads]
