@@ -13,6 +13,8 @@ class Alert:
     def fail(self):
         return 'function is not defined'
 
+    
+
 class Email_alert(Alert):
 
     def __init__(self, config):

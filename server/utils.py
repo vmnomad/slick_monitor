@@ -141,7 +141,7 @@ class Monitor_test(Thread):
                     print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
             else:
                 logging.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
-                
+
             # passing result data to queue
             test_result = [self.status, self.result_info]
             queue.put(test_result)
@@ -184,10 +184,11 @@ class Thread_manager(Thread):
                     if dict(temp_monitor[my_param]) != getattr(thread, my_param):
                         print(colored('param {} is different'.format(my_param), 'red'))
                         logging.info(colored('Updating monitor parameters for {}, type: {}'.format(thread.hostname, thread.type), 'blue'))
-                        thread.params = dict(temp_monitor[my_param]) 
+                        thread.params = dict(temp_monitor[my_param])
                 else:
                     if temp_monitor[my_param] != getattr(thread, my_param):
                         print(colored('param {} is different'.format(my_param), 'red'))
+                        setattr(thread, my_param, temp_monitor[my_param])
 
     def run(self):
         id = 0
