@@ -7,8 +7,6 @@ import pprint
 import logging
 import requests
 import json
-#logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
-
 
 
 class Alert:

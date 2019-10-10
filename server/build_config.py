@@ -33,9 +33,7 @@ monitors1 = [
         'interval' : 5,
         'ftt' : 3,
         'alert_type' : 'slack',
-        'params' : {
-            'count' : 3
-        }
+        'params' : (('count', 3),)
     }
 ]
 
@@ -47,9 +45,7 @@ monitors2 = [
         'interval' : 15,
         'ftt' : 3,
         'alert_type' : 'email',
-        'params' : {
-            'count' : 3
-        }
+        'params' : (('count', 3),)
     },
     {
         'id' : 2,
@@ -58,9 +54,7 @@ monitors2 = [
         'interval' : 3,
         'ftt' : 3,
         'alert_type' : 'slack',
-        'params' : {
-            'count' : 3
-        }
+        'params' : (('count', 3),)
     },
     {
         'id' : 3,
@@ -69,9 +63,8 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 1,
         'alert_type' : 'email',
-        'params' : {
-            'allowed_codes' : [200, 201]
-        }
+        'params' : (('allowed_codes', [200, 201]),)
+        
     },
     {
         'id' : 7,
@@ -80,10 +73,10 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 1,
         'alert_type' : 'email',
-        'params' : {
-            'allowed_codes' : [200, 201],
-            'regexp' : 'python'
-        }
+        'params' : (
+            ('allowed_codes', [200, 201]),
+            ('regexp', 'python')
+        )
     },
     {
         'id' : 4,
@@ -92,9 +85,7 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
-        'params' : {
-            'allowed_codes' : [200, 201]
-        }
+        'params' : (('allowed_codes', [200, 201]),)
     },
     {
         'id' : 5,
@@ -103,11 +94,10 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
-        'params' : {
-            'username' : 'vmnomad',
-            'password' : 'TTkJmjSudbgK8w'
-
-        }
+        'params' : (
+            ('username', 'vmnomad'),
+            ('password', 'TTkJmjSudbgK8w')
+        )
     },
     {
         'id' : 6,
@@ -116,10 +106,10 @@ monitors2 = [
          'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
-        'params' : {
-            'port' : 443,
-            'timeout' : 2
-        }
+        'params' : (
+            ('port', 443),
+            ('timeout',  2)
+        )
     }
 ]
 

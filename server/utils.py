@@ -95,7 +95,7 @@ class Monitor_test(Thread):
         self.alert_type = monitor_specs['alert_type'] 
         self.ftt = monitor_specs['ftt']
         self.interval = monitor_specs['interval']
-        self.params = monitor_specs['params']
+        self.params = dict(monitor_specs['params'])
         self.alert = Monitor_test.alertObj.create_alert(self.alert_type, global_config)
 
         # generic params 
@@ -156,6 +156,7 @@ class Monitor_test(Thread):
             return colored('Ping to {} failed'.format(self.hostname), 'red')
 
 
+# responsible for start/stop of threads and updating the threads parameteres
 class Thread_manager(Thread):
     def __init__(self, filename, threads, test_mode = False):
         Thread.__init__(self)
@@ -163,6 +164,25 @@ class Thread_manager(Thread):
         self.file_name = filename
         self.threads = threads
         self.test_mode = test_mode
+
+    @staticmethod
+    def update_params(threads, monitors):
+        for thread in threads:
+            # get monitor config with the same ID as thread
+            temp_monitor = [monitor for monitor in monitors if monitor['id'] == thread.id][0]
+            
+            # compare all parameters from the list
+            for my_param in MUTABLE_PARAMS:
+
+                # convert to dict if comparing params
+                if my_param == 'params':
+                    if dict(temp_monitor[my_param]) != getattr(thread, my_param):
+                        print(colored('param {} is different'.format(my_param), 'red'))
+                        logging.info(colored('Updating monitor parameters for {}, type: {}'.format(thread.hostname, thread.type), 'blue'))
+                        thread.params = dict(temp_monitor[my_param]) 
+                else:
+                    if temp_monitor[my_param] != getattr(thread, my_param):
+                        print(colored('param {} is different'.format(my_param), 'red'))
 
     def run(self):
         id = 0
@@ -204,6 +224,12 @@ class Thread_manager(Thread):
                     obj.alive = False
                     obj.join()
                     self.threads.remove(obj)     
+
+
+            # compare params
+
+            Thread_manager.update_params(self.threads, thread_monitors)
+
 
             time.sleep(2)
             id += 1        

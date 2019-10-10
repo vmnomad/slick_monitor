@@ -6,7 +6,7 @@ from termcolor import colored
 import paramiko
 import socket
 
-logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 # disables Paramiko logging
 logging.getLogger("paramiko").setLevel(logging.WARNING)
