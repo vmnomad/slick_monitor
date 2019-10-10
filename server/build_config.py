@@ -33,6 +33,7 @@ monitors1 = [
         'interval' : 5,
         'ftt' : 3,
         'alert_type' : 'slack',
+        'alert_enabled' : True,
         'params' : (('count', 3),)
     }
 ]
@@ -45,6 +46,7 @@ monitors2 = [
         'interval' : 15,
         'ftt' : 3,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (('count', 3),)
     },
     {
@@ -54,6 +56,7 @@ monitors2 = [
         'interval' : 3,
         'ftt' : 3,
         'alert_type' : 'slack',
+        'alert_enabled' : False,
         'params' : (('count', 3),)
     },
     {
@@ -63,6 +66,7 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 1,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (('allowed_codes', [200, 201]),)
         
     },
@@ -73,6 +77,7 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 1,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (
             ('allowed_codes', [200, 201]),
             ('regexp', 'python')
@@ -85,6 +90,7 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (('allowed_codes', [200, 201]),)
     },
     {
@@ -94,6 +100,7 @@ monitors2 = [
         'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (
             ('username', 'vmnomad'),
             ('password', 'TTkJmjSudbgK8w')
@@ -106,6 +113,7 @@ monitors2 = [
          'interval' : 10,
         'ftt' : 3,
         'alert_type' : 'email',
+        'alert_enabled' : True,
         'params' : (
             ('port', 443),
             ('timeout',  2)

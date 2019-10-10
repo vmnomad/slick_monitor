@@ -12,7 +12,7 @@ from Tests import Test_Factory
 from Alerts import Alert_Factory
 
 COLOR = 'yellow'
-MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'params']
+MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 
 class Stats(Thread):
@@ -93,7 +93,8 @@ class Monitor_test(Thread):
         self.id = monitor_specs['id']
         self.hostname = monitor_specs['hostname']
         self.type = monitor_specs['type']
-        self.alert_type = monitor_specs['alert_type'] 
+        self.alert_type = monitor_specs['alert_type']
+        self.alert_enabled = monitor_specs['alert_enabled']
         self.ftt = monitor_specs['ftt']
         self.interval = monitor_specs['interval']
         self.params = dict(monitor_specs['params'])
@@ -131,13 +132,16 @@ class Monitor_test(Thread):
             #alert = alertObj.create_alert(self.alert_type, global_config)
 
             # sending Alert if needed
-            try:
-                if self.failed >= self.ftt:
-                    self.last_fail = datetime.datetime.now()
-                    self.alert.fail(self)
-            except Exception as er:
-                print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
-
+            if self.alert_enabled == True:
+                try:
+                    if self.failed >= self.ftt:
+                        self.last_fail = datetime.datetime.now()
+                        self.alert.fail(self)
+                except Exception as er:
+                    print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
+            else:
+                logging.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
+                
             # passing result data to queue
             test_result = [self.status, self.result_info]
             queue.put(test_result)
