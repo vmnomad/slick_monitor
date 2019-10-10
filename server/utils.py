@@ -1,6 +1,7 @@
 
 import subprocess
 from threading import Thread
+import threading
 import time
 import datetime
 import logging
@@ -80,7 +81,7 @@ class Stats(Thread):
 
     def run(self):
         while True:
-            logging.info('CPU: {}, Mem: {}, Uptime: {}'.format(self.cpu(), self.memory(), self.uptime()))
+            logging.info('Threads: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), self.cpu(), self.memory(), self.uptime()))
             time.sleep(self.interval)
 
 class Monitor_test(Thread):
