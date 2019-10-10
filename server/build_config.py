@@ -1,5 +1,7 @@
 import shelve
 
+
+
 global_config = {
     'email' :
     {
@@ -28,10 +30,10 @@ monitors1 = [
         'id' : 0,
         'hostname' : '4.4.4.4',
         'type' : 'ping',
+        'interval' : 5,
+        'ftt' : 3,
+        'alert_type' : 'slack',
         'params' : {
-            'interval' : 5,
-            'ftt' : 3,
-            'alert_type' : 'slack',
             'count' : 3
         }
     }
@@ -42,10 +44,10 @@ monitors2 = [
         'id' : 1,
         'hostname' : 'google.com',
         'type' : 'ping',
+        'interval' : 15,
+        'ftt' : 3,
+        'alert_type' : 'email',
         'params' : {
-            'interval' : 15,
-            'ftt' : 3,
-            'alert_type' : 'email',
             'count' : 3
         }
     },
@@ -53,10 +55,10 @@ monitors2 = [
         'id' : 2,
         'hostname' : '4.4.4.4',
         'type' : 'ping',
+        'interval' : 3,
+        'ftt' : 3,
+        'alert_type' : 'slack',
         'params' : {
-            'interval' : 3,
-            'ftt' : 3,
-            'alert_type' : 'slack',
             'count' : 3
         }
     },
@@ -64,10 +66,10 @@ monitors2 = [
         'id' : 3,
         'hostname' : 'https://www.vmware.com',
         'type' : 'http',
+        'interval' : 10,
+        'ftt' : 1,
+        'alert_type' : 'email',
         'params' : {
-            'interval' : 10,
-            'ftt' : 1,
-            'alert_type' : 'email',
             'allowed_codes' : [200, 201]
         }
     },
@@ -75,10 +77,10 @@ monitors2 = [
         'id' : 7,
         'hostname' : 'https://automatetheboringstuff.com',
         'type' : 'http',
+        'interval' : 10,
+        'ftt' : 1,
+        'alert_type' : 'email',
         'params' : {
-            'interval' : 10,
-            'ftt' : 1,
-            'alert_type' : 'email',
             'allowed_codes' : [200, 201],
             'regexp' : 'python'
         }
@@ -87,10 +89,10 @@ monitors2 = [
         'id' : 4,
         'hostname' : 'bbc.com',
         'type' : 'http',
+        'interval' : 10,
+        'ftt' : 3,
+        'alert_type' : 'email',
         'params' : {
-            'interval' : 10,
-            'ftt' : 3,
-            'alert_type' : 'email',
             'allowed_codes' : [200, 201]
         }
     },
@@ -98,23 +100,24 @@ monitors2 = [
         'id' : 5,
         'hostname' : 'tty.sdf.org',
         'type' : 'ssh',
+        'interval' : 10,
+        'ftt' : 3,
+        'alert_type' : 'email',
         'params' : {
             'username' : 'vmnomad',
-            'password' : 'TTkJmjSudbgK8w',
-            'interval' : 10,
-            'ftt' : 3,
-            'alert_type' : 'email'
+            'password' : 'TTkJmjSudbgK8w'
+
         }
     },
     {
         'id' : 6,
         'hostname' : 'optus.com.au',
         'type' : 'tcp',
+         'interval' : 10,
+        'ftt' : 3,
+        'alert_type' : 'email',
         'params' : {
             'port' : 443,
-            'interval' : 10,
-            'ftt' : 3,
-            'alert_type' : 'email',
             'timeout' : 2
         }
     }

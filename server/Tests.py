@@ -6,7 +6,7 @@ from termcolor import colored
 import paramiko
 import socket
 
-logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 # disables Paramiko logging
 logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -14,8 +14,8 @@ logging.getLogger("paramiko").setLevel(logging.WARNING)
 class Test:
     def __init__(self, config):
         self.hostname = config.hostname
-        self.ftt = config.params['ftt']
-        self.interval = config.params['interval']
+        self.ftt = config.ftt
+        self.interval = config.interval
     
     @staticmethod
     def set_result(obj,typ, message):

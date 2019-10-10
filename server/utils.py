@@ -11,8 +11,8 @@ from Tests import Test_Factory
 from Alerts import Alert_Factory
 
 COLOR = 'yellow'
+MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'params']
 
-#logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 class Stats(Thread):
     def __init__(self, name, interval):
@@ -92,9 +92,9 @@ class Monitor_test(Thread):
         self.id = monitor_specs['id']
         self.hostname = monitor_specs['hostname']
         self.type = monitor_specs['type']
-        self.alert_type = monitor_specs['params']['alert_type'] 
-        self.ftt = monitor_specs['params']['ftt']
-        self.interval = monitor_specs['params']['interval']
+        self.alert_type = monitor_specs['alert_type'] 
+        self.ftt = monitor_specs['ftt']
+        self.interval = monitor_specs['interval']
         self.params = monitor_specs['params']
         self.alert = Monitor_test.alertObj.create_alert(self.alert_type, global_config)
 
