@@ -54,9 +54,9 @@ monitors2 = [
         'hostname' : '4.4.4.4',
         'type' : 'ping',
         'interval' : 3,
-        'ftt' : 3,
+        'ftt' : 1,
         'alert_type' : 'slack',
-        'alert_enabled' : False,
+        'alert_enabled' : True,
         'params' : (('count', 3),)
     },
     {

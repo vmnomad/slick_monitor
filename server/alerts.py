@@ -8,7 +8,6 @@ import logging
 import requests
 import json
 
-
 class Alert:
     def fail(self):
         return 'function is not defined'
@@ -84,12 +83,10 @@ class Slack_alert(Alert):
             try:
                 data = {"text": monitor.result_info}
                 request = requests.post(self.webhook, json=data, headers=self.headers)
+                request.raise_for_status()
                 monitor.alert_time = datetime.datetime.now()
-
-                if request.status_code != 200:
-                    raise 'Failed to send slack message. Status code: {}'.format(request.status_code)
             except Exception as er:
-                logging.debug('Failed to send slack alert. Error: {}'.format(er))
+                logging.info('Failed to send slack alert. Error: {}'.format(er))
         else:
             logging.debug('Skipping Slack alert, alert interval has not expired yet')
         
