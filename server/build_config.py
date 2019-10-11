@@ -28,7 +28,7 @@ global_config = {
 monitors1 = [
     {
         'id' : 0,
-        'hostname' : '4.4.4.4',
+        'hostname' : '4.4.4.5',
         'type' : 'ping',
         'interval' : 5,
         'ftt' : 3,
@@ -51,7 +51,7 @@ monitors2 = [
     },
     {
         'id' : 2,
-        'hostname' : '4.4.4.4',
+        'hostname' : '4.4.4.5',
         'type' : 'ping',
         'interval' : 3,
         'ftt' : 1,

@@ -8,18 +8,24 @@ from queue import Queue
 import logging
 import builtins
 import datetime
-
+import os
 
 # local modulues
 from Utils import Stats, Monitor_test, Thread_manager
 
-CONFIG_FILE = 'config'
+# build config
+os.system('python build_config.py')
+
+
+curr_dir = os.getcwd()
+CONFIG_FILE = os.path.join(curr_dir, 'config')
 test_mode = False
 
 logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 # config
 shelfFile = shelve.open(CONFIG_FILE)
+print(shelfFile.keys)
 builtins.global_config = shelfFile['global_config']
 builtins.monitors = shelfFile['monitors2']
 builtins.queue = Queue(100)

@@ -31,14 +31,14 @@ class Stats(Thread):
             output = subprocess.run(['ps'], stdout = subprocess.PIPE)
         except Exception as er:
             print('failed to capture PID of', self.name, ', Error:', er)
-            raise
 
         output = output.stdout.decode('utf-8')
         output = output.strip(' ').split('\n')
+        print('PID Output')
         for line in output:
             if self.name in line:
                 return line.strip(' ').split(' ')[0]
-        raise 'Failed to find PID for program {}'.format(self.name)
+        raise Exception('Failed to find PID for program {}'.format(self.name))
 
 
     # some black magic shit with passing cmd output between pipes in cli
