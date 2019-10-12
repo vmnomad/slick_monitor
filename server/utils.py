@@ -7,12 +7,34 @@ import datetime
 import logging
 from termcolor import colored
 import shelve
+import os
 
 from Tests import Test_Factory
 from Alerts import Alert_Factory
 
 COLOR = 'yellow'
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
+
+
+import sqlite3
+import ast
+
+
+def read_config():
+    conn = sqlite3.connect('server.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from MONITORS")
+    result = cursor.fetchall()
+
+    monitors = [dict(row) for row in result]
+
+    for i in range(len(monitors)):
+        temp_dict = ast.literal_eval(monitors[i]['params'])
+        monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
+    
+    conn.close()
+    return monitors
+
 
 
 class Stats(Thread):
@@ -34,7 +56,6 @@ class Stats(Thread):
 
         output = output.stdout.decode('utf-8')
         output = output.strip(' ').split('\n')
-        print('PID Output')
         for line in output:
             if self.name in line:
                 return line.strip(' ').split(' ')[0]
@@ -132,7 +153,7 @@ class Monitor_test(Thread):
             #alert = alertObj.create_alert(self.alert_type, global_config)
 
             # sending Alert if needed
-            if self.alert_enabled == True:
+            if self.alert_enabled == 1:
                 try:
                     if self.failed >= self.ftt:
                         self.last_fail = datetime.datetime.now()
@@ -151,8 +172,8 @@ class Monitor_test(Thread):
             while wait < self.interval:
                 if self.alive == False:
                     break
-                time.sleep(5)
-                wait += 5
+                time.sleep(1)
+                wait += 1
 
     def get_status(self):
         if self.status == True:
@@ -163,12 +184,11 @@ class Monitor_test(Thread):
 
 # responsible for start/stop of threads and updating the threads parameteres
 class Thread_manager(Thread):
-    def __init__(self, filename, threads, test_mode = False):
+    def __init__(self, filename, threads):
         Thread.__init__(self)
         self.daemon = True
         self.file_name = filename
         self.threads = threads
-        self.test_mode = test_mode
 
     @staticmethod
     def update_params(threads, monitors):
@@ -191,22 +211,9 @@ class Thread_manager(Thread):
                         setattr(thread, my_param, temp_monitor[my_param])
 
     def run(self):
-        id = 0
         while True:
 
-            # get config file
-            with shelve.open(self.file_name) as shelfFile:
-                if self.test_mode == True:
-                    # simulation of new monitors being added and removed
-                    if id > 30:
-                        thread_monitors = shelfFile['monitors1']
-                    elif id > 15:
-                        thread_monitors = shelfFile['monitors2']
-                    else:
-                        thread_monitors = shelfFile['monitors1']
-                    shelfFile.close()
-                else:
-                    thread_monitors = shelfFile['monitors2']
+            thread_monitors = read_config()
                 
             # get IDs of running threads
             thread_ids = [obj.id for obj in self.threads]
@@ -231,11 +238,8 @@ class Thread_manager(Thread):
                     obj.join()
                     self.threads.remove(obj)     
 
-
             # compare params
-
             Thread_manager.update_params(self.threads, thread_monitors)
 
 
-            time.sleep(2)
-            id += 1        
+            time.sleep(1)    

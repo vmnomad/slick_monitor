@@ -2,6 +2,8 @@ import shelve
 
 
 
+
+
 global_config = {
     'email' :
     {
@@ -25,105 +27,9 @@ global_config = {
     }
 }
 
-monitors1 = [
-    {
-        'id' : 0,
-        'hostname' : '4.4.4.5',
-        'type' : 'ping',
-        'interval' : 5,
-        'ftt' : 3,
-        'alert_type' : 'slack',
-        'alert_enabled' : True,
-        'params' : (('count', 3),)
-    }
-]
-
-monitors2 = [
-    {
-        'id' : 1,
-        'hostname' : 'google.com',
-        'type' : 'ping',
-        'interval' : 15,
-        'ftt' : 3,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (('count', 3),)
-    },
-    {
-        'id' : 2,
-        'hostname' : '4.4.4.5',
-        'type' : 'ping',
-        'interval' : 3,
-        'ftt' : 1,
-        'alert_type' : 'slack',
-        'alert_enabled' : True,
-        'params' : (('count', 3),)
-    },
-    {
-        'id' : 3,
-        'hostname' : 'https://www.vmware.com',
-        'type' : 'http',
-        'interval' : 10,
-        'ftt' : 1,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (('allowed_codes', [200, 201]),)
-        
-    },
-    {
-        'id' : 7,
-        'hostname' : 'https://automatetheboringstuff.com',
-        'type' : 'http',
-        'interval' : 10,
-        'ftt' : 1,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (
-            ('allowed_codes', [200, 201]),
-            ('regexp', 'python')
-        )
-    },
-    {
-        'id' : 4,
-        'hostname' : 'bbc.com',
-        'type' : 'http',
-        'interval' : 10,
-        'ftt' : 3,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (('allowed_codes', [200, 201]),)
-    },
-    {
-        'id' : 5,
-        'hostname' : 'tty.sdf.org',
-        'type' : 'ssh',
-        'interval' : 10,
-        'ftt' : 3,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (
-            ('username', 'vmnomad'),
-            ('password', 'TTkJmjSudbgK8w')
-        )
-    },
-    {
-        'id' : 6,
-        'hostname' : 'optus.com.au',
-        'type' : 'tcp',
-         'interval' : 10,
-        'ftt' : 3,
-        'alert_type' : 'email',
-        'alert_enabled' : True,
-        'params' : (
-            ('port', 443),
-            ('timeout',  2)
-        )
-    }
-]
-
 
 shelfFile = shelve.open('config')
-shelfFile['monitors1'] = monitors1
-shelfFile['monitors2'] = monitors2
+#shelfFile['monitors1'] = monitors1
+#shelfFile['monitors2'] = monitors2
 shelfFile['global_config'] = global_config
 shelfFile.close()
