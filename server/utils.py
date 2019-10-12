@@ -102,7 +102,8 @@ class Stats(Thread):
 
     def run(self):
         while True:
-            logging.info('Threads: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), self.cpu(), self.memory(), self.uptime()))
+            monitor_threads = [thread for thread in threading.enumerate() if hasattr(thread, 'id')]
+            logging.info('Total Threads: {}, Monitors: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), len(monitor_threads), self.cpu(), self.memory(), self.uptime()))
             time.sleep(self.interval)
 
 class Monitor_test(Thread):
