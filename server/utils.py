@@ -12,29 +12,15 @@ import os
 from Tests import Test_Factory
 from Alerts import Alert_Factory
 
+# Color for Stats logging
 COLOR = 'yellow'
+
+# Monitor paramers that are allowed to be updated
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 
 import sqlite3
 import ast
-
-
-def read_config():
-    conn = sqlite3.connect('server.db')
-    conn.row_factory = sqlite3.Row
-    cursor = conn.execute("SELECT * from MONITORS")
-    result = cursor.fetchall()
-
-    monitors = [dict(row) for row in result]
-
-    for i in range(len(monitors)):
-        temp_dict = ast.literal_eval(monitors[i]['params'])
-        monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
-    
-    conn.close()
-    return monitors
-
 
 
 class Stats(Thread):
@@ -178,9 +164,11 @@ class Monitor_test(Thread):
 
     def get_status(self):
         if self.status == True:
-            return colored('Ping to {} was successful'.format(self.hostname), 'green')
+            #return colored('Ping to {} was successful'.format(self.hostname), 'green')
+            return 1
         else:
-            return colored('Ping to {} failed'.format(self.hostname), 'red')
+            #return colored('Ping to {} failed'.format(self.hostname), 'red')
+            return 0
 
 
 # responsible for start/stop of threads and updating the threads parameteres
@@ -190,6 +178,24 @@ class Thread_manager(Thread):
         self.daemon = True
         self.file_name = filename
         self.threads = threads
+
+    @staticmethod
+    def read_config():
+        conn = sqlite3.connect('server.db', timeout=5.0)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * from MONITORS")
+        result = cursor.fetchall()
+        
+        # convert Row to Dict to be able to update dict parameters
+        monitors = [dict(row) for row in result]
+
+        for i in range(len(monitors)):
+            temp_dict = ast.literal_eval(monitors[i]['params'])
+            monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
+        #raise Exception('error')
+        conn.close()
+        #logging.debug('Successfully read monitors configuration from MONITORS table')
+        return monitors
 
     @staticmethod
     def update_params(threads, monitors):
@@ -214,7 +220,7 @@ class Thread_manager(Thread):
     def run(self):
         while True:
 
-            thread_monitors = read_config()
+            thread_monitors = Thread_manager.read_config()
                 
             # get IDs of running threads
             thread_ids = [obj.id for obj in self.threads]
@@ -244,3 +250,41 @@ class Thread_manager(Thread):
 
 
             time.sleep(1)    
+
+
+class State_manager(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.daemon = True
+    
+    def run(self):
+        errors = 0
+        while True:
+            try:
+                # open DB connection
+                conn = sqlite3.connect('server.db')
+                conn.commit()
+                logging.debug('Cleaned States Table')
+
+                # reset STATES table
+                conn.execute('DELETE FROM STATES')
+
+                # populate table with new values
+                monitor_threads = [thread for thread in threading.enumerate() if hasattr(thread, 'id')]
+                
+                for thread in monitor_threads:
+                    #print("ID: {}, Status: {}".format(thread.id, thread.status))
+                    state = thread.get_status()
+                    conn.execute('INSERT INTO STATES (monitor_id, state) VALUES ({}, {})'.format(thread.id, state))
+
+
+                conn.commit()
+                logging.debug('Updated States Table')
+                conn.close()
+            except Exception as er:
+                errors += 1
+                logging.info(colored('Failed to update States table. Error: {}, Total Errors: {}'.format(er, errors), 'red'))
+            finally:
+                conn.close()
+
+            time.sleep(1)

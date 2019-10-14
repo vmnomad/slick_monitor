@@ -11,7 +11,7 @@ import datetime
 import os
 
 # local modulues
-from Utils import Stats, Monitor_test, Thread_manager, read_config
+from Utils import Stats, Monitor_test, Thread_manager, State_manager
 # build config
 os.system('python build_config.py')
 
@@ -22,7 +22,7 @@ CONFIG_FILE = os.path.join(curr_dir, 'config')
 # config
 shelfFile = shelve.open(CONFIG_FILE)
 builtins.global_config = shelfFile['global_config']
-builtins.monitors = read_config()
+builtins.monitors = Thread_manager.read_config()
 builtins.queue = Queue(1000)
 shelfFile.close()
 
@@ -53,6 +53,10 @@ for monitor in monitors:
 # start thread manager
 thread_manager = Thread_manager(CONFIG_FILE, threads)
 thread_manager.start()
+
+state_manager = State_manager()
+state_manager.start()
+
 
 while True:
     if not queue.empty():
