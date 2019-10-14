@@ -14,7 +14,7 @@ global_config = {
         'ssl' : True,
         'username' : 'slick.monitor.35',
         'password' : 'VMware1!',
-        'alert_interval' : 300
+        'alert_interval' : 3600
     },
     'syslog' : 
     {
@@ -23,7 +23,7 @@ global_config = {
     'slack' : 
     {
         'webhook' : 'https://hooks.slack.com/services/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',
-        'alert_interval' : 300
+        'alert_interval' : 3600
     }
 }
 

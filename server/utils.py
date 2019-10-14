@@ -105,7 +105,7 @@ class Monitor_test(Thread):
         self.alert_enabled = monitor_specs['alert_enabled']
         self.ftt = monitor_specs['ftt']
         self.interval = monitor_specs['interval']
-        self.params = dict(monitor_specs['params'])
+        self.params = monitor_specs['params']
         self.alert = Monitor_test.alertObj.create_alert(self.alert_type, global_config)
 
         # generic params 
@@ -190,8 +190,9 @@ class Thread_manager(Thread):
         monitors = [dict(row) for row in result]
 
         for i in range(len(monitors)):
-            temp_dict = ast.literal_eval(monitors[i]['params'])
-            monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
+            #temp_dict = ast.literal_eval(monitors[i]['params'])
+            #monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
+            monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
         #raise Exception('error')
         conn.close()
         #logging.debug('Successfully read monitors configuration from MONITORS table')
@@ -208,14 +209,13 @@ class Thread_manager(Thread):
 
                 # convert to dict if comparing params
                 if my_param == 'params':
-                    if dict(temp_monitor[my_param]) != getattr(threads[i], my_param):
-                        logging.info(colored('Updating PARAMS for {}, type: {}. Old Params: {}, New Params: {}'.format(threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
-                        threads[i].params = dict(temp_monitor[my_param])
-                else:
                     if temp_monitor[my_param] != getattr(threads[i], my_param):
-                        setattr(threads[i], my_param, temp_monitor[my_param])
+                        logging.info(colored('Updating PARAMS for {}, type: {}. Old Params: {}, New Params: {}'.format(threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
+                        threads[i].params = temp_monitor[my_param]
+                else:
+                    if temp_monitor[my_param] != getattr(threads[i], my_param):                       
                         logging.info(colored('Updating {} for {}, type: {}. Old setting: {}, New setting: {}'.format(my_param.upper(), threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
-
+                        setattr(threads[i], my_param, temp_monitor[my_param])
     def run(self):
         while True:
 
