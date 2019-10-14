@@ -199,23 +199,22 @@ class Thread_manager(Thread):
 
     @staticmethod
     def update_params(threads, monitors):
-        for thread in threads:
+        for i in range(len(threads)):
             # get monitor config with the same ID as thread
-            temp_monitor = [monitor for monitor in monitors if monitor['id'] == thread.id][0]
+            temp_monitor = [monitor for monitor in monitors if monitor['id'] == threads[i].id][0]
             
             # compare all parameters from the list
             for my_param in MUTABLE_PARAMS:
 
                 # convert to dict if comparing params
                 if my_param == 'params':
-                    if dict(temp_monitor[my_param]) != getattr(thread, my_param):
-                        print(colored('param {} is different'.format(my_param), 'red'))
-                        logging.info(colored('Updating monitor parameters for {}, type: {}'.format(thread.hostname, thread.type), 'blue'))
-                        thread.params = dict(temp_monitor[my_param])
+                    if dict(temp_monitor[my_param]) != getattr(threads[i], my_param):
+                        logging.info(colored('Updating PARAMS for {}, type: {}. Old Params: {}, New Params: {}'.format(threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
+                        threads[i].params = dict(temp_monitor[my_param])
                 else:
-                    if temp_monitor[my_param] != getattr(thread, my_param):
-                        print(colored('param {} is different'.format(my_param), 'red'))
-                        setattr(thread, my_param, temp_monitor[my_param])
+                    if temp_monitor[my_param] != getattr(threads[i], my_param):
+                        setattr(threads[i], my_param, temp_monitor[my_param])
+                        logging.info(colored('Updating {} for {}, type: {}. Old setting: {}, New setting: {}'.format(my_param.upper(), threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
 
     def run(self):
         while True:
