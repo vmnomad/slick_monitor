@@ -8,6 +8,7 @@ import logging
 from termcolor import colored
 import shelve
 import os
+import json
 
 from Tests import Test_Factory
 from Alerts import Alert_Factory
@@ -22,6 +23,18 @@ MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 import sqlite3
 import ast
 
+
+def get_alerts():
+    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from ALERTS")
+    result = cursor.fetchall()
+
+    alerts = {}
+    for alert in result:
+        alerts[alert['type']] =json.loads(alert['settings'])
+
+    return alerts
 
 class Stats(Thread):
     def __init__(self, name, interval):
@@ -262,17 +275,15 @@ class State_manager(Thread):
             try:
                 # open DB connection
                 conn = sqlite3.connect('server.db')
-                conn.commit()
-                logging.debug('Cleaned States Table')
 
                 # reset STATES table
                 conn.execute('DELETE FROM STATES')
-
+                conn.commit()
+                logging.debug('Cleaned States Table')
                 # populate table with new values
                 monitor_threads = [thread for thread in threading.enumerate() if hasattr(thread, 'id')]
                 
                 for thread in monitor_threads:
-                    #print("ID: {}, Status: {}".format(thread.id, thread.status))
                     state = thread.get_status()
                     conn.execute('INSERT INTO STATES (monitor_id, state) VALUES ({}, {})'.format(thread.id, state))
 

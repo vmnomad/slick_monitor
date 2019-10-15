@@ -26,6 +26,8 @@ class Email_alert(Alert):
         self.password = config['password']
         self.alert_interval = config['alert_interval']
     
+    def __str__(self):
+        return 'Email Alert for SMTP Host: {}'.format(self.smtp_host)
 
     def fail(self, monitor):
 
@@ -100,3 +102,4 @@ class Alert_Factory():
         alert_config = global_config[typ]
         target_class = typ.capitalize() + "_alert"
         return globals()[target_class](alert_config)
+

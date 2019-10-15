@@ -1,5 +1,5 @@
 import shelve
-
+import json
 
 
 
@@ -22,11 +22,13 @@ global_config = {
     },
     'slack' : 
     {
-        'webhook' : 'https://hooks.slack.com/services/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',
+        'webhook' : 'https://hooks.slack.com/services/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',
         'alert_interval' : 3600
     }
 }
 
+
+print(json.dumps(global_config['email']))
 
 shelfFile = shelve.open('config')
 #shelfFile['monitors1'] = monitors1

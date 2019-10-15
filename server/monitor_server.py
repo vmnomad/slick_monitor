@@ -11,9 +11,9 @@ import datetime
 import os
 
 # local modulues
-from Utils import Stats, Monitor_test, Thread_manager, State_manager
+from Utils import Stats, Monitor_test, Thread_manager, State_manager, get_alerts
 # build config
-os.system('python build_config.py')
+#os.system('python build_config.py')
 
 curr_dir = os.getcwd()
 CONFIG_FILE = os.path.join(curr_dir, 'config')
@@ -21,7 +21,8 @@ CONFIG_FILE = os.path.join(curr_dir, 'config')
 
 # config
 shelfFile = shelve.open(CONFIG_FILE)
-builtins.global_config = shelfFile['global_config']
+#builtins.global_config = shelfFile['global_config']
+builtins.global_config = get_alerts()
 builtins.monitors = Thread_manager.read_config()
 builtins.queue = Queue(1000)
 shelfFile.close()
