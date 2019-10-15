@@ -24,7 +24,7 @@ import sqlite3
 import ast
 
 
-def get_alerts():
+def load_alerts():
     conn = sqlite3.connect('server.db', timeout=5.0)
     conn.row_factory = sqlite3.Row
     cursor = conn.execute("SELECT * from ALERTS")
@@ -35,6 +35,24 @@ def get_alerts():
         alerts[alert['type']] =json.loads(alert['settings'])
 
     return alerts
+
+def load_monitors():
+        conn = sqlite3.connect('server.db', timeout=5.0)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * from MONITORS")
+        result = cursor.fetchall()
+        
+        # convert Row to Dict to be able to update dict parameters
+        monitors = [dict(row) for row in result]
+
+        for i in range(len(monitors)):
+            #temp_dict = ast.literal_eval(monitors[i]['params'])
+            #monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
+            monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
+        #raise Exception('error')
+        conn.close()
+
+        return monitors
 
 class Stats(Thread):
     def __init__(self, name, interval):
@@ -119,7 +137,7 @@ class Monitor_test(Thread):
         self.ftt = monitor_specs['ftt']
         self.interval = monitor_specs['interval']
         self.params = monitor_specs['params']
-        self.alert = Monitor_test.alertObj.create_alert(self.alert_type, global_config)
+        self.alert = Monitor_test.alertObj.create_alert(self.alert_type, alerts)
 
         # generic params 
         self.failed = 0
@@ -192,24 +210,6 @@ class Thread_manager(Thread):
         self.file_name = filename
         self.threads = threads
 
-    @staticmethod
-    def read_config():
-        conn = sqlite3.connect('server.db', timeout=5.0)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.execute("SELECT * from MONITORS")
-        result = cursor.fetchall()
-        
-        # convert Row to Dict to be able to update dict parameters
-        monitors = [dict(row) for row in result]
-
-        for i in range(len(monitors)):
-            #temp_dict = ast.literal_eval(monitors[i]['params'])
-            #monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
-            monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
-        #raise Exception('error')
-        conn.close()
-        #logging.debug('Successfully read monitors configuration from MONITORS table')
-        return monitors
 
     @staticmethod
     def update_params(threads, monitors):
@@ -232,7 +232,7 @@ class Thread_manager(Thread):
     def run(self):
         while True:
 
-            thread_monitors = Thread_manager.read_config()
+            thread_monitors = load_monitors()
                 
             # get IDs of running threads
             thread_ids = [obj.id for obj in self.threads]

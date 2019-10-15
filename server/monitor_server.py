@@ -11,53 +11,66 @@ import datetime
 import os
 
 # local modulues
-from Utils import Stats, Monitor_test, Thread_manager, State_manager, get_alerts
-# build config
-#os.system('python build_config.py')
+from Utils import Stats, Monitor_test, Thread_manager, State_manager, load_alerts, load_monitors
 
+# will use dirs later
 curr_dir = os.getcwd()
 CONFIG_FILE = os.path.join(curr_dir, 'config')
 
 
 # config
-shelfFile = shelve.open(CONFIG_FILE)
-#builtins.global_config = shelfFile['global_config']
-builtins.global_config = get_alerts()
-builtins.monitors = Thread_manager.read_config()
+builtins.alerts = load_alerts()
+builtins.monitors = load_monitors()
 builtins.queue = Queue(1000)
-shelfFile.close()
 
-
+# setting up logging
 logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
 
-# main function starts here
+
+
+####### Main function starts here ########
+
 
 # initiate Performance stats
-server_stats = Stats(sys.argv[0], 30)
-server_stats.start()
+try:
+    server_stats = Stats(sys.argv[0], 30)
+    server_stats.start()
+except Exception as error:
+    sys.exit('Failed to start Stats thread. Error: {}'.format(error))
+
+try:
+    # starting monitors
+    threads = []
+    for monitor in monitors:
+        
+        # create a thread
+        current = Monitor_test(monitor)
+
+        # track threads
+        threads.append(current)
+
+        # start a thread
+        current.start()
+except Exception as error:
+    sys.exit('Failed to start Monitor thread. Monitor ID: {}, Error: {}'.format(monitor['hostname'], error))
+
+# start Thread manager
+try:
+    thread_manager = Thread_manager(CONFIG_FILE, threads)
+    thread_manager.start()
+except Exception as error:
+    sys.exit('Failed to start Thread Mananger. Error: {}'.format(error))
+
+# start State manager
+try:
+    state_manager = State_manager()
+    state_manager.start()
+except Exception as error:
+    sys.exit('Failed to start State Mananger. Error: {}'.format(error))
 
 
-threads = []
-# start initial config
-for monitor in monitors:
-    
-    # create a thread, add fake id
-    current = Monitor_test(monitor)
 
-    # track threads
-    threads.append(current)
-
-    # start a thread
-    current.start()
-
-
-# start thread manager
-thread_manager = Thread_manager(CONFIG_FILE, threads)
-thread_manager.start()
-
-state_manager = State_manager()
-state_manager.start()
-
+logging.info('All processes started successfully')
 
 while True:
     if not queue.empty():
