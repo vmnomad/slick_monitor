@@ -24,18 +24,6 @@ import sqlite3
 import ast
 
 
-def load_alerts():
-    conn = sqlite3.connect('server.db', timeout=5.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.execute("SELECT * from ALERTS")
-    result = cursor.fetchall()
-
-    alerts = {}
-    for alert in result:
-        alerts[alert['type']] =json.loads(alert['settings'])
-
-    return alerts
-
 def load_monitors():
         conn = sqlite3.connect('server.db', timeout=5.0)
         conn.row_factory = sqlite3.Row
@@ -125,8 +113,7 @@ class Stats(Thread):
 
 class Monitor_test(Thread):
 
-    alertObj = Alert_Factory()
-
+    #alertObj = Alert_Factory()
     def __init__(self, monitor_specs):
         Thread.__init__(self)
         self.id = monitor_specs['id']
@@ -137,7 +124,7 @@ class Monitor_test(Thread):
         self.ftt = monitor_specs['ftt']
         self.interval = monitor_specs['interval']
         self.params = monitor_specs['params']
-        self.alert = Monitor_test.alertObj.create_alert(self.alert_type, alerts)
+
 
         # generic params 
         self.failed = 0
@@ -167,15 +154,15 @@ class Monitor_test(Thread):
             # creating Alert
             #  TODO check if the alert config changed before recreating test obj  
             #  TODO if the alert hasn't changed no need to instantiate Test class              
-            #alertObj = Alert_Factory()
-            #alert = alertObj.create_alert(self.alert_type, global_config)
+            alertObj = Alert_Factory()
+            alert = alertObj.create_alert(self.alert_type)
 
             # sending Alert if needed
             if self.alert_enabled == 1:
                 try:
                     if self.failed >= self.ftt:
                         self.last_fail = datetime.datetime.now()
-                        self.alert.fail(self)
+                        alert.fail(self)
                 except Exception as er:
                     print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
             else:
@@ -204,6 +191,8 @@ class Monitor_test(Thread):
 
 # responsible for start/stop of threads and updating the threads parameteres
 class Thread_manager(Thread):
+
+
     def __init__(self, filename, threads):
         Thread.__init__(self)
         self.daemon = True
@@ -229,6 +218,7 @@ class Thread_manager(Thread):
                     if temp_monitor[my_param] != getattr(threads[i], my_param):                       
                         logging.info(colored('Updating {} for {}, type: {}. Old setting: {}, New setting: {}'.format(my_param.upper(), threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
                         setattr(threads[i], my_param, temp_monitor[my_param])
+
     def run(self):
         while True:
 
@@ -257,9 +247,8 @@ class Thread_manager(Thread):
                     obj.join()
                     self.threads.remove(obj)     
 
-            # compare params
+            # update params
             Thread_manager.update_params(self.threads, thread_monitors)
-
 
             time.sleep(1)    
 

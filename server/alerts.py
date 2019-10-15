@@ -7,6 +7,20 @@ import pprint
 import logging
 import requests
 import json
+import sqlite3
+
+def load_alerts():
+    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from ALERTS")
+    result = cursor.fetchall()
+
+    alerts = {}
+    for alert in result:
+        alerts[alert['type']] =json.loads(alert['settings'])
+
+    return alerts
+
 
 class Alert:
     def fail(self):
@@ -27,7 +41,7 @@ class Email_alert(Alert):
         self.alert_interval = config['alert_interval']
     
     def __str__(self):
-        return 'Email Alert for SMTP Host: {}'.format(self.smtp_host)
+        return 'Email Alert to: {}'.format(self.to_addr)
 
     def fail(self, monitor):
 
@@ -98,7 +112,8 @@ class Syslog_alert(Alert):
     pass
 
 class Alert_Factory():
-   def create_alert(self, typ, global_config):
+   def create_alert(self, typ):
+        global_config = load_alerts()
         alert_config = global_config[typ]
         target_class = typ.capitalize() + "_alert"
         return globals()[target_class](alert_config)

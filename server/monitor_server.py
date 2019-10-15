@@ -11,16 +11,18 @@ import datetime
 import os
 
 # local modulues
-from Utils import Stats, Monitor_test, Thread_manager, State_manager, load_alerts, load_monitors
-
+from Utils import Stats, Monitor_test, Thread_manager, State_manager, load_monitors
+from Alerts import load_alerts
 # will use dirs later
 curr_dir = os.getcwd()
 CONFIG_FILE = os.path.join(curr_dir, 'config')
 
 
-# config
+# load configuration
 builtins.alerts = load_alerts()
 builtins.monitors = load_monitors()
+
+
 builtins.queue = Queue(1000)
 
 # setting up logging
@@ -67,7 +69,6 @@ try:
     state_manager.start()
 except Exception as error:
     sys.exit('Failed to start State Mananger. Error: {}'.format(error))
-
 
 
 logging.info('All processes started successfully')
