@@ -9,6 +9,7 @@ from termcolor import colored
 import shelve
 import os
 import json
+from cryptography.fernet import Fernet
 
 from Tests import Test_Factory
 from Alerts import Alert_Factory
@@ -41,6 +42,27 @@ def load_monitors():
         conn.close()
 
         return monitors
+
+
+# takes key as byte literal and secret as string
+def encrypt(secret, key):
+    secret = secret.encode('utf-8')
+
+    cipher_suite = Fernet(key)
+    ciphered_text = cipher_suite.encrypt(secret)
+
+    # returns byte literal
+    return ciphered_text
+
+
+# takes key and secret as byte literal
+def decrypt(secret, key):
+    cipher_suite = Fernet(key)
+    decrypted_text = cipher_suite.decrypt(secret)
+
+    # returns string
+    return decrypted_text.decode('utf-8') 
+
 
 class Stats(Thread):
     def __init__(self, name, interval):
