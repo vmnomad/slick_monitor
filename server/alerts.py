@@ -9,17 +9,9 @@ import requests
 import json
 import sqlite3
 
-def load_alerts():
-    conn = sqlite3.connect('server.db', timeout=5.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.execute("SELECT * from ALERTS")
-    result = cursor.fetchall()
+from Utils import decrypt, load_alerts
 
-    alerts = {}
-    for alert in result:
-        alerts[alert['type']] =json.loads(alert['settings'])
 
-    return alerts
 
 
 class Alert:
@@ -37,7 +29,7 @@ class Email_alert(Alert):
         self.to_addr = config['to_addr']
         self.ssl = config['ssl']
         self.username = config['username']
-        self.password = config['password']
+        self.password = decrypt(config['password'])
         self.alert_interval = config['alert_interval']
     
     def __str__(self):
@@ -88,7 +80,7 @@ Error Info: %s """ % (
 class Slack_alert(Alert):
 
     def __init__(self, config):
-        self.webhook = config['webhook']
+        self.webhook = decrypt(config['webhook'])
         self.headers = {"Content-type": "application/json"}
         self.alert_interval = config['alert_interval']
 
@@ -111,10 +103,11 @@ class Syslog_alert(Alert):
     # TODO
     pass
 
+
+
 class Alert_Factory():
    def create_alert(self, typ):
         global_config = load_alerts()
         alert_config = global_config[typ]
         target_class = typ.capitalize() + "_alert"
         return globals()[target_class](alert_config)
-

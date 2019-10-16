@@ -10,9 +10,24 @@ import shelve
 import os
 import json
 from cryptography.fernet import Fernet
+import sqlite3
+import ast
 
-from Tests import Test_Factory
-from Alerts import Alert_Factory
+
+
+
+def load_alerts():
+    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from ALERTS")
+    result = cursor.fetchall()
+
+    alerts = {}
+    for alert in result:
+        alerts[alert['type']] =json.loads(alert['settings'])
+
+    return alerts
+
 
 # Color for Stats logging
 COLOR = 'yellow'
@@ -21,9 +36,44 @@ COLOR = 'yellow'
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 
-import sqlite3
-import ast
+KEYS_FOLDER = 'keys'
+KEY_FILE = 'key_file.bin'
+cwd = os.getcwd()
 
+keys_path = os.path.join(cwd,KEYS_FOLDER,KEY_FILE)
+
+def get_key():   
+    with open(keys_path, 'rb') as key_file:
+       return key_file.readline()
+
+
+# takes key as byte literal and secret as string
+def encrypt(secret):
+    key = get_key()
+    secret = secret.encode('utf-8')
+
+    cipher_suite = Fernet(key)
+    ciphered_text = cipher_suite.encrypt(secret)
+
+    # returns byte literal
+    return ciphered_text
+
+
+# takes key as byte literal and secret as string
+def decrypt(secret):
+    key = get_key()
+    secret = secret.encode('utf-8')
+    cipher_suite = Fernet(key)
+    decrypted_text = cipher_suite.decrypt(secret)
+
+    # returns string
+    return decrypted_text.decode('utf-8') 
+
+
+print('SSH Pass:',encrypt('TTkJmjSudbgK8w'))
+print('Slack WebHook:', encrypt('https://hooks.slack.com/services/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'))
+print('Email Password:', encrypt('VMware1!'))
+#print(decrypt(encrypt(text)))
 
 def load_monitors():
         conn = sqlite3.connect('server.db', timeout=5.0)
@@ -42,27 +92,6 @@ def load_monitors():
         conn.close()
 
         return monitors
-
-
-# takes key as byte literal and secret as string
-def encrypt(secret, key):
-    secret = secret.encode('utf-8')
-
-    cipher_suite = Fernet(key)
-    ciphered_text = cipher_suite.encrypt(secret)
-
-    # returns byte literal
-    return ciphered_text
-
-
-# takes key and secret as byte literal
-def decrypt(secret, key):
-    cipher_suite = Fernet(key)
-    decrypted_text = cipher_suite.decrypt(secret)
-
-    # returns string
-    return decrypted_text.decode('utf-8') 
-
 
 class Stats(Thread):
     def __init__(self, name, interval):
@@ -133,82 +162,6 @@ class Stats(Thread):
             logging.info('Total Threads: {}, Monitors: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), len(monitor_threads), self.cpu(), self.memory(), self.uptime()))
             time.sleep(self.interval)
 
-class Monitor_test(Thread):
-
-    #alertObj = Alert_Factory()
-    def __init__(self, monitor_specs):
-        Thread.__init__(self)
-        self.id = monitor_specs['id']
-        self.hostname = monitor_specs['hostname']
-        self.type = monitor_specs['type']
-        self.alert_type = monitor_specs['alert_type']
-        self.alert_enabled = monitor_specs['alert_enabled']
-        self.ftt = monitor_specs['ftt']
-        self.interval = monitor_specs['interval']
-        self.params = monitor_specs['params']
-
-
-        # generic params 
-        self.failed = 0
-        self.daemon = True
-        self.alert_time = datetime.datetime.now() - datetime.timedelta(days=1)
-        self.last_fail = 0
-        self.status = False
-        self.result_info = ''
-        self.alive = True
-
-
-    def __str__(self):
-        return '{} test for {}'.format(self.type.capitalize(), self.hostname)
-    
-
-    def run(self):
-        while self.alive:
-            # creating Test
-            # TODO check if the test config changed before recreating test obj
-            # TODO if the config hasn't changed no need to instantiate Test class
-            testObj = Test_Factory()
-            my_test = testObj.create_test(self.type, self)
-
-            # running Test
-            my_test.run(self)
-        
-            # creating Alert
-            #  TODO check if the alert config changed before recreating test obj  
-            #  TODO if the alert hasn't changed no need to instantiate Test class              
-            alertObj = Alert_Factory()
-            alert = alertObj.create_alert(self.alert_type)
-
-            # sending Alert if needed
-            if self.alert_enabled == 1:
-                try:
-                    if self.failed >= self.ftt:
-                        self.last_fail = datetime.datetime.now()
-                        alert.fail(self)
-                except Exception as er:
-                    print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
-            else:
-                logging.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
-
-            # passing result data to queue
-            test_result = [self.status, self.result_info]
-            queue.put(test_result)
-
-            # improved wait timer for quicker thread stop
-            wait = 0
-            while wait < self.interval:
-                if self.alive == False:
-                    break
-                time.sleep(1)
-                wait += 1
-
-    def get_status(self):
-        if self.status == True:
-            #return colored('Ping to {} was successful'.format(self.hostname), 'green')
-            return 1
-        else:
-            #return colored('Ping to {} failed'.format(self.hostname), 'red')
-            return 0
 
 
 # responsible for start/stop of threads and updating the threads parameteres
