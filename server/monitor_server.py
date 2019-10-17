@@ -15,6 +15,11 @@ from Utils import Stats, Thread_manager, State_manager, load_monitors, load_aler
 from Alerts import Alert_Factory
 from Tests import Test_Factory
 
+
+# temp import
+import socket
+
+
 # will use dirs later
 curr_dir = os.getcwd()
 CONFIG_FILE = os.path.join(curr_dir, 'config')
@@ -156,13 +161,34 @@ except Exception as error:
 
 logging.info('All processes started successfully')
 
+
+
+hostame = '127.0.0.1'
+port = '1234'
+
+
+class Netcat():
+    def __init__(self, hostname, port):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((hostame, int(port)))
+    
+    def send(self, content):
+        content = content + '\n'
+        self.socket.send(content.encode())
+
+
+nc_logger = Netcat(hostame,port)
+
+
 while True:
     if not queue.empty():
         status, message = queue.get()
         if status:
-            logging.info(colored('{}'.format(message), 'green'))
+            #logging.info(colored('{}'.format(message), 'green'))
+            nc_logger.send(colored('{}'.format(message), 'green'))
         else:
-            logging.info(colored('{}'.format(message), 'red'))
+            #logging.info(colored('{}'.format(message), 'red'))
+            nc_logger.send(colored('{}'.format(message), 'red'))
     time.sleep(0.1)
 
 
