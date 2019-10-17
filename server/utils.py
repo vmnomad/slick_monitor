@@ -12,6 +12,8 @@ import json
 from cryptography.fernet import Fernet
 import sqlite3
 import ast
+import sys
+import os
 
 
 
@@ -69,10 +71,6 @@ def decrypt(secret):
     # returns string
     return decrypted_text.decode('utf-8') 
 
-
-print('SSH Pass:',encrypt('TTkJmjSudbgK8w'))
-print('Slack WebHook:', encrypt('https://hooks.slack.com/services/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'))
-print('Email Password:', encrypt('VMware1!'))
 #print(decrypt(encrypt(text)))
 
 def load_monitors():

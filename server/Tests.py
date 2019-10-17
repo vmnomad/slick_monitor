@@ -113,7 +113,7 @@ class Ssh_test(Test):
         self.cmd = 'ls'
         self.timeout = 5
         self.username = config.params['username']
-        self.password = config.params['password']      
+        self.password = decrypt(config.params['password'])
 
 
     def run(self, monitor):
