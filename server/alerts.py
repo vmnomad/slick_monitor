@@ -99,12 +99,6 @@ class Slack_alert(Alert):
             logging.debug('Skipping Slack alert, alert interval has not expired yet')
         
 
-class Syslog_alert(Alert):
-    # TODO
-    pass
-
-
-
 class Alert_Factory():
    def create_alert(self, typ):
         global_config = load_alerts()

@@ -44,9 +44,16 @@ cwd = os.getcwd()
 
 keys_path = os.path.join(cwd,KEYS_FOLDER,KEY_FILE)
 
+
+def load_loggers():
+    pass
+
+
 def get_key():   
     with open(keys_path, 'rb') as key_file:
        return key_file.readline()
+
+
 
 
 # takes key as byte literal and secret as string
