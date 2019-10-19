@@ -14,6 +14,7 @@ import os
 from Utils import Stats, Thread_manager, State_manager, load_monitors, load_alerts
 from Alerts import Alert_Factory
 from Tests import Test_Factory
+import Loggers
 
 
 # temp import
@@ -33,7 +34,8 @@ builtins.monitors = load_monitors()
 builtins.queue = Queue(1000)
 
 # setting up logging
-logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
+
+#logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
 
 
 
@@ -163,21 +165,37 @@ logging.info('All processes started successfully')
 
 
 
-hostame = '127.0.0.1'
+hostname = '127.0.0.1'
 port = '1234'
 
 
 class Netcat():
     def __init__(self, hostname, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((hostame, int(port)))
+        self.socket.connect((hostname, int(port)))
     
     def send(self, content):
         content = content + '\n'
         self.socket.send(content.encode())
 
 
-nc_logger = Netcat(hostame,port)
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# set format
+nc_format = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
+
+# create nc handler
+nc_handler = Loggers.Nc_handler(hostname, port, format)
+
+# set handler's format
+nc_handler.setFormatter(nc_format)
+
+# set handler's level
+nc_handler.setLevel(logging.INFO)
+
+logger.addHandler(nc_handler)
 
 
 while True:
@@ -185,10 +203,12 @@ while True:
         status, message = queue.get()
         if status:
             #logging.info(colored('{}'.format(message), 'green'))
-            nc_logger.send(colored('{}'.format(message), 'green'))
+            #logger.info(message)
+            logger.info(colored('{}'.format(message), 'green'))
         else:
             #logging.info(colored('{}'.format(message), 'red'))
-            nc_logger.send(colored('{}'.format(message), 'red'))
+            #logger.info(message)
+            logger.info(colored('{}'.format(message), 'red'))
     time.sleep(0.1)
 
 

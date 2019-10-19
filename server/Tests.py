@@ -12,6 +12,23 @@ from Utils import decrypt
 # disables Paramiko logging
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 
+Tests_logger = logging.getLogger(__name__)
+Tests_logger.setLevel(logging.INFO)
+# set format
+ch_format = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
+
+# create nc handler
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+# set handler's format
+ch.setFormatter(ch_format)
+
+# set handler's level
+ch.setLevel(logging.INFO)
+
+Tests_logger.addHandler(ch)
+
+
 class Test:
     def __init__(self, config):
         self.hostname = config.hostname
