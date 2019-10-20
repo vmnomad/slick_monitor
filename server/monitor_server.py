@@ -10,11 +10,13 @@ import builtins
 import datetime
 import os
 
+
 # local modulues
 from Utils import Stats, Thread_manager, State_manager, load_monitors, load_alerts
 from Alerts import Alert_Factory
 from Tests import Test_Factory
-import Loggers
+from Loggers import get_logger
+
 
 
 # temp import
@@ -35,7 +37,7 @@ builtins.queue = Queue(1000)
 
 # setting up logging
 
-#logging.basicConfig(level=logging.INFO, format=' %(asctime)s - %(levelname)s - %(message)s')
+logger = get_logger()
 
 
 
@@ -98,7 +100,7 @@ class Monitor_test(Thread):
                 except Exception as er:
                     print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
             else:
-                logging.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
+                logger.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
 
             # passing result data to queue
             test_result = [self.status, self.result_info]
@@ -161,42 +163,7 @@ except Exception as error:
     sys.exit('Failed to start State Mananger. Error: {}'.format(error))
 
 
-logging.info('All processes started successfully')
-
-
-
-hostname = '127.0.0.1'
-port = '1234'
-
-
-class Netcat():
-    def __init__(self, hostname, port):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((hostname, int(port)))
-    
-    def send(self, content):
-        content = content + '\n'
-        self.socket.send(content.encode())
-
-
-
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-# set format
-nc_format = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
-
-# create nc handler
-nc_handler = Loggers.Nc_handler(hostname, port, format)
-
-# set handler's format
-nc_handler.setFormatter(nc_format)
-
-# set handler's level
-nc_handler.setLevel(logging.INFO)
-
-logger.addHandler(nc_handler)
-
+logger.info('All processes started successfully')
 
 while True:
     if not queue.empty():
