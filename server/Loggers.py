@@ -2,26 +2,39 @@ from Utils import load_loggers
 import logging
 import socket
 from logging.handlers import RotatingFileHandler
+import sqlite3
+import json
 
+LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
 
 def get_logging_config():
-    pass
+    
+    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from LOGGERS")
+    result = cursor.fetchall()
 
+    my_loggers = {}
+    for item in result:
+        my_loggers[item['type']] =json.loads(item['settings'])
+
+    return my_loggers
+
+
+def get_console_handler(settings):
+    c_handler = logging.StreamHandler()
+    c_handler.setLevel(settings['logging_level'])
 
 def get_logger():
-    hostname = '127.0.0.1'
-    port = '1234'
 
 
     logger = logging.getLogger(__name__)
-    logger.propagate = False # disables propagation of mylogger to root logger
-
+    #logger.propagate = False # disables propagation of mylogger to root logger
     logger.setLevel(logging.INFO)
     # set format
-    nc_format = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
-
+    nc_format = logging.Formatter(LOGGING_FORMAT)
     # create nc handler
-    nc_handler =Nc_handler(hostname, port, format)
+    nc_handler = Nc_handler(hostname, port, format)
 
     # set handler's format
     nc_handler.setFormatter(nc_format)
