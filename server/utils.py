@@ -37,23 +37,8 @@ COLOR = 'yellow'
 # Monitor paramers that are allowed to be updated
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
-
-KEYS_FOLDER = 'keys'
-KEY_FILE = 'key_file.bin'
-cwd = os.getcwd()
-
-keys_path = os.path.join(cwd,KEYS_FOLDER,KEY_FILE)
-
-
-def load_loggers():
-    pass
-
-
-def get_key():   
-    with open(keys_path, 'rb') as key_file:
-       return key_file.readline()
-
-
+def get_key():
+    return os.getenv('MONITOR_KEY')
 
 
 # takes key as byte literal and secret as string
