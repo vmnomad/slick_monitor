@@ -15,7 +15,7 @@ import os
 from Utils import Stats, Thread_manager, State_manager, load_monitors, load_alerts
 from Alerts import Alert_Factory
 from Tests import Test_Factory
-from Loggers import get_logger
+from Loggers import get_logger, update_logger
 
 
 
@@ -176,6 +176,7 @@ while True:
             #logging.info(colored('{}'.format(message), 'red'))
             #logger.info(message)
             logger.info(colored('{}'.format(message), 'red'))
+        update_logger(logger)
     time.sleep(0.1)
 
 

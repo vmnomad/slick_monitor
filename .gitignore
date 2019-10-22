@@ -1,0 +1,5 @@
+server/__pycache__/
+server/keys/
+server/logs/
+server/archive/
+server/encrypt_credentials.py

@@ -50,7 +50,7 @@ def encrypt(secret):
     ciphered_text = cipher_suite.encrypt(secret)
 
     # returns byte literal
-    return ciphered_text
+    return ciphered_text.decode('utf-8')
 
 
 # takes key as byte literal and secret as string
