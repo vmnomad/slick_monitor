@@ -8,10 +8,12 @@ import logging
 import requests
 import json
 import sqlite3
+import Loggers
 
 from Utils import decrypt, load_alerts
 
 
+alerts_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 
 
 class Alert:
@@ -67,14 +69,15 @@ Error Info: %s """ % (
                 smtpObj.sendmail(self.from_addr, self.to_addr, message.as_string())
                 smtpObj.quit()
 
+                alerts_logger.debug('Email alert sent for: {} / {}'.format(monitor.hostname, monitor.type))
                 # update last alert time
                 monitor.alert_time = datetime.datetime.now()
 
             except Exception as er:
-                logging.debug('Failed to send email: {}, {}. Error: {}'.format(monitor.hostname, monitor.type, er))
+                alerts_logger.exception('Failed to send email: {}, {}. Error: {}'.format(monitor.hostname, monitor.type, er))
             
         else:
-            logging.debug('Skipping email alert, alert interval has not expired yet')
+            alerts_logger.debug('Skipping email alert, alert interval has not expired yet')
 
 
 class Slack_alert(Alert):
@@ -94,9 +97,9 @@ class Slack_alert(Alert):
                 request.raise_for_status()
                 monitor.alert_time = datetime.datetime.now()
             except Exception as er:
-                logging.info('Failed to send slack alert. Error: {}'.format(er))
+                alerts_logger.error('Failed to send slack alert. Error: {}'.format(er))
         else:
-            logging.debug('Skipping Slack alert, alert interval has not expired yet')
+            alerts_logger.debug('Skipping Slack alert, alert interval has not expired yet')
         
 
 class Alert_Factory():

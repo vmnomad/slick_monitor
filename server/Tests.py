@@ -7,27 +7,13 @@ import paramiko
 import socket
 
 from Utils import decrypt
-#logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s - %(message)s')
+import Loggers
 
 # disables Paramiko logging
 logging.getLogger("paramiko").setLevel(logging.WARNING)
 
-Tests_logger = logging.getLogger(__name__)
-Tests_logger.setLevel(logging.INFO)
-# set format
-ch_format = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s')
-
-# create nc handler
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-# set handler's format
-ch.setFormatter(ch_format)
-
-# set handler's level
-ch.setLevel(logging.INFO)
-
-Tests_logger.addHandler(ch)
-
+# setting up module logger
+tests_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 
 class Test:
     def __init__(self, config):
@@ -44,7 +30,6 @@ class Test:
         else:
             obj.status = False
             obj.failed += 1
-
 
 class Ping_test(Test):
 
@@ -68,10 +53,9 @@ class Ping_test(Test):
         try:
             response = check_output(self.cmd).decode('utf-8')
             Ping_test.set_result(config, 'success', 'Successful ping: {}, avg response time: {}'.format(self.hostname, Ping_test.get_avg_time(response)))
+            tests_logger.info('Successful ping: {}, avg response time: {}'.format(self.hostname, Ping_test.get_avg_time(response)))
         except Exception as e:
             Ping_test.set_result(config, 'fail', 'Failed ping: {}. Error: {}'.format(self.hostname, e))
-
-
 
 class Http_test(Test):
     def __init__(self, config):

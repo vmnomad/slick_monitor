@@ -14,9 +14,16 @@ import sqlite3
 import ast
 import sys
 import os
+import Loggers
 
+# Color for Stats logging
+COLOR = 'yellow'
 
+# setting up module logger
+utils_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 
+# Monitor paramers that are allowed to be updated
+MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 def load_alerts():
     conn = sqlite3.connect('server.db', timeout=5.0)
@@ -30,16 +37,9 @@ def load_alerts():
 
     return alerts
 
-
-# Color for Stats logging
-COLOR = 'yellow'
-
-# Monitor paramers that are allowed to be updated
-MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
-
 def get_key():
-    return os.getenv('MONITOR_KEY')
-
+    key = os.getenv('MONITOR_KEY')
+    return key
 
 # takes key as byte literal and secret as string
 def encrypt(secret):
@@ -52,7 +52,6 @@ def encrypt(secret):
     # returns byte literal
     return ciphered_text.decode('utf-8')
 
-
 # takes key as byte literal and secret as string
 def decrypt(secret):
     key = get_key()
@@ -63,7 +62,6 @@ def decrypt(secret):
     # returns string
     return decrypted_text.decode('utf-8') 
 
-#print(decrypt(encrypt(text)))
 
 def load_monitors():
         conn = sqlite3.connect('server.db', timeout=5.0)
@@ -149,10 +147,8 @@ class Stats(Thread):
     def run(self):
         while True:
             monitor_threads = [thread for thread in threading.enumerate() if hasattr(thread, 'id')]
-            logging.info('Total Threads: {}, Monitors: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), len(monitor_threads), self.cpu(), self.memory(), self.uptime()))
+            utils_logger.info('Total Threads: {}, Monitors: {}, CPU: {}, Mem: {}, Uptime: {}'.format(threading.active_count(), len(monitor_threads), self.cpu(), self.memory(), self.uptime()))
             time.sleep(self.interval)
-
-
 
 # responsible for start/stop of threads and updating the threads parameteres
 class Thread_manager(Thread):
@@ -177,11 +173,11 @@ class Thread_manager(Thread):
                 # convert to dict if comparing params
                 if my_param == 'params':
                     if temp_monitor[my_param] != getattr(threads[i], my_param):
-                        logging.info(colored('Updating PARAMS for {}, type: {}. Old Params: {}, New Params: {}'.format(threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
+                        utils_logger.info(colored('Updating PARAMS for {}, type: {}. Old Params: {}, New Params: {}'.format(threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
                         threads[i].params = temp_monitor[my_param]
                 else:
                     if temp_monitor[my_param] != getattr(threads[i], my_param):                       
-                        logging.info(colored('Updating {} for {}, type: {}. Old setting: {}, New setting: {}'.format(my_param.upper(), threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
+                        utils_logger.info(colored('Updating {} for {}, type: {}. Old setting: {}, New setting: {}'.format(my_param.upper(), threads[i].hostname, threads[i].type, getattr(threads[i], my_param), temp_monitor[my_param]), 'blue'))
                         setattr(threads[i], my_param, temp_monitor[my_param])
 
     def run(self):
@@ -197,7 +193,7 @@ class Thread_manager(Thread):
 
                 # check if it is started
                 if not monitor['id'] in thread_ids:
-                    logging.info(colored('Starting new thread for {}'.format(monitor['hostname']), 'red'))
+                    utils_logger.info(colored('Starting new thread for {}'.format(monitor['hostname']), 'red'))
                     new_thread = Monitor_test(monitor)
                     self.threads.append(new_thread)
                     new_thread.start()
@@ -207,7 +203,7 @@ class Thread_manager(Thread):
 
             for obj in self.threads:
                 if not obj.id in monitor_ids:
-                    logging.info(colored('Stopping thread for {}'.format(obj.hostname), 'red'))
+                    utils_logger.info(colored('Stopping thread for {}'.format(obj.hostname), 'red'))
                     obj.alive = False
                     obj.join()
                     self.threads.remove(obj)     
@@ -217,7 +213,7 @@ class Thread_manager(Thread):
 
             time.sleep(1)    
 
-
+# updates States table
 class State_manager(Thread):
     def __init__(self):
         Thread.__init__(self)
@@ -233,7 +229,7 @@ class State_manager(Thread):
                 # reset STATES table
                 conn.execute('DELETE FROM STATES')
                 conn.commit()
-                logging.debug('Cleaned States Table')
+                utils_logger.debug('Cleaned States Table')
                 # populate table with new values
                 monitor_threads = [thread for thread in threading.enumerate() if hasattr(thread, 'id')]
                 
@@ -243,11 +239,11 @@ class State_manager(Thread):
 
 
                 conn.commit()
-                logging.debug('Updated States Table')
+                utils_logger.debug('Updated States Table')
                 conn.close()
             except Exception as er:
                 errors += 1
-                logging.info(colored('Failed to update States table. Error: {}, Total Errors: {}'.format(er, errors), 'red'))
+                utils_logger.info(colored('Failed to update States table. Error: {}, Total Errors: {}'.format(er, errors), 'red'))
             finally:
                 conn.close()
 

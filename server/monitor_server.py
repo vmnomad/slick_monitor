@@ -9,18 +9,14 @@ import logging
 import builtins
 import datetime
 import os
+from logging.handlers import  QueueListener
 
 
 # local modulues
 from Utils import Stats, Thread_manager, State_manager, load_monitors, load_alerts
 from Alerts import Alert_Factory
 from Tests import Test_Factory
-from Loggers import get_logger, update_logger
-
-
-
-# temp import
-import socket
+import Loggers
 
 
 # will use dirs later
@@ -32,18 +28,26 @@ CONFIG_FILE = os.path.join(curr_dir, 'config')
 builtins.alerts = load_alerts()
 builtins.monitors = load_monitors()
 
-
 builtins.queue = Queue(1000)
 
-# setting up logging
+# setting up module logger
+main_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 
-logger = get_logger()
+# setting up queue handlers and logger
+m_console_handler = logging.StreamHandler()
+m_console_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter(' %(asctime)s - %(levelname)s - %(module)s - %(message)s')
+m_console_handler.setFormatter(formatter)
+
+m_file_handler = logging.FileHandler("queue_example.log")
+m_file_handler.setFormatter(formatter)
+
+listener = QueueListener(log_queue, m_console_handler, m_file_handler, respect_handler_level=True)
 
 
 
 ####### Main function starts here ########
-
-
 
 class Monitor_test(Thread):
 
@@ -98,9 +102,9 @@ class Monitor_test(Thread):
                         self.last_fail = datetime.datetime.now()
                         alert.fail(self)
                 except Exception as er:
-                    print('Failed to send alert. Error: {}, Object: {}'.format(er, self))
+                    main_logger.exception('Failed to send alert. Error: {}, Object: {}'.format(er, self))
             else:
-                logger.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
+                main_logger.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
 
             # passing result data to queue
             test_result = [self.status, self.result_info]
@@ -121,8 +125,6 @@ class Monitor_test(Thread):
         else:
             #return colored('Ping to {} failed'.format(self.hostname), 'red')
             return 0
-
-
 
 
 # initiate Performance stats
@@ -163,20 +165,22 @@ except Exception as error:
     sys.exit('Failed to start State Mananger. Error: {}'.format(error))
 
 
-logger.info('All processes started successfully')
+main_logger.info('All processes started successfully')
 
+listener.start()
 while True:
     if not queue.empty():
         status, message = queue.get()
         if status:
             #logging.info(colored('{}'.format(message), 'green'))
             #logger.info(message)
-            logger.info(colored('{}'.format(message), 'green'))
+            main_logger.info(colored('{}'.format(message), 'green'))
         else:
             #logging.info(colored('{}'.format(message), 'red'))
             #logger.info(message)
-            logger.info(colored('{}'.format(message), 'red'))
-        update_logger(logger)
+            main_logger.info(colored('{}'.format(message), 'red'))
+    
     time.sleep(0.1)
 
+listener.stop()
 
