@@ -6,7 +6,9 @@ import json
 from queue import Queue
 import builtins
 from logging.handlers import QueueHandler
-LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(name)s - %(module)s - %(message)s')
+LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s - %(module)s')
+
+
 
 # setting up module logger
 loggers_logger = logging.getLogger(__name__)
@@ -52,11 +54,11 @@ class Netcat_handler(logging.Handler):
             except Exception as error:
                 loggers_logger.error('Failed emit. Error: {}'.format(error))
         else:
-            loggers_logger.warning('Failed emit. Error: {}'.format(error))
+            loggers_logger.warning('Failed emit. Netcat logger is not initialized.')
 
 def get_logging_config():
 
-    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn = sqlite3.connect('server test.db', timeout=5.0)
     conn.row_factory = sqlite3.Row
     cursor = conn.execute("SELECT * from LOGGERS")
     result = cursor.fetchall()
@@ -105,6 +107,18 @@ def get_logging_handler(log_type, settings):
     except:
         return None
 
+
+def get_handlers():
+    logging_config = get_logging_config()
+    handlers = []
+    for log_type, settings in logging_config.items():
+        log_handler = get_logging_handler(log_type, settings)
+        if log_handler != None:
+            handlers.append(log_handler)
+
+    return tuple(handlers)        
+
+
 builtins.log_queue = Queue(-1)
 def get_queue_logger(log_level, module_name):
     q_handler = QueueHandler(log_queue)
@@ -128,7 +142,7 @@ def get_logger():
                 logger.info('{} logging is enabled'.format(log_type.capitalize()))
             
     except Exception as error:
-        print('Failed to initialise logging handler {}. Error: {}'.format(log_type, error))
+        loggers_logger.error('Failed to initialise logging handler {}. Error: {}'.format(log_type, error))
 
     return logger
 
@@ -137,15 +151,13 @@ def update_logger(logger):
     handlers = logger.handlers
     new_config = logging_config = get_logging_config()
     for i in range(len(handlers)):
-        #print(handlers[i].name)
         h_name = handlers[i].name
         if h_name != 'netcat_handler':
             handlers[i].setLevel = new_config[h_name.split('_')[0]]['logging_level']
-            #print('Setting Handler: {} with new logging level: {}'.format(h_name, new_config[h_name.split('_')[0]]['logging_level']))
+            loggers_logger.debug('Setting Handler: {} with new logging level: {}'.format(h_name, new_config[h_name.split('_')[0]]['logging_level']))
         else:
-            #print(new_log_level)
             new_hostname = new_config[h_name.split('_')[0]]['hostname']
             new_port = new_config[h_name.split('_')[0]]['port']
             new_logging_level = new_config[h_name.split('_')[0]]['logging_level']
             handlers[i].update(new_hostname, new_port, new_logging_level)
-            #print('Setting Handler: {} with new logging level: {}'.format(h_name, new_config[h_name.split('_')[0]]['logging_level']))
+            loggers_logger.debug('Setting Handler: {} with new logging level: {}'.format(h_name, new_config[h_name.split('_')[0]]['logging_level']))

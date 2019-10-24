@@ -23,32 +23,22 @@ import Loggers
 curr_dir = os.getcwd()
 CONFIG_FILE = os.path.join(curr_dir, 'config')
 
-
 # load configuration
 builtins.alerts = load_alerts()
 builtins.monitors = load_monitors()
 
 builtins.queue = Queue(1000)
 
-# setting up module logger
+# setting up main logger
 main_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 
-# setting up queue handlers and logger
-m_console_handler = logging.StreamHandler()
-m_console_handler.setLevel(logging.DEBUG)
+# getting logging handlers configuration
+handlers = Loggers.get_handlers()
 
-formatter = logging.Formatter(' %(asctime)s - %(levelname)s - %(module)s - %(message)s')
-m_console_handler.setFormatter(formatter)
-
-m_file_handler = logging.FileHandler("queue_example.log")
-m_file_handler.setFormatter(formatter)
-
-listener = QueueListener(log_queue, m_console_handler, m_file_handler, respect_handler_level=True)
-
-
+# create queue listener
+listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
 
 ####### Main function starts here ########
-
 class Monitor_test(Thread):
 
     #alertObj = Alert_Factory()
@@ -108,7 +98,7 @@ class Monitor_test(Thread):
 
             # passing result data to queue
             test_result = [self.status, self.result_info]
-            queue.put(test_result)
+            #queue.put(test_result)
 
             # improved wait timer for quicker thread stop
             wait = 0
@@ -125,7 +115,6 @@ class Monitor_test(Thread):
         else:
             #return colored('Ping to {} failed'.format(self.hostname), 'red')
             return 0
-
 
 # initiate Performance stats
 try:

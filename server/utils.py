@@ -16,6 +16,9 @@ import sys
 import os
 import Loggers
 
+# Database Name
+DB_NAME = 'server test.db'
+
 # Color for Stats logging
 COLOR = 'yellow'
 
@@ -64,7 +67,7 @@ def decrypt(secret):
 
 
 def load_monitors():
-        conn = sqlite3.connect('server.db', timeout=5.0)
+        conn = sqlite3.connect(DB_NAME, timeout=5.0)
         conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * from MONITORS")
         result = cursor.fetchall()
@@ -96,7 +99,7 @@ class Stats(Thread):
         try:
             output = subprocess.run(['ps'], stdout = subprocess.PIPE)
         except Exception as er:
-            print('failed to capture PID of', self.name, ', Error:', er)
+            utils_logger.error('failed to capture PID of {}, Error: {}'.format(self.name, er))
 
         output = output.stdout.decode('utf-8')
         output = output.strip(' ').split('\n')
