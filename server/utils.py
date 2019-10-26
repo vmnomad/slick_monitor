@@ -17,7 +17,7 @@ import os
 import Loggers
 
 # Database Name
-DB_NAME = 'server test.db'
+DB_NAME = 'server.db'
 
 # Color for Stats logging
 COLOR = 'yellow'

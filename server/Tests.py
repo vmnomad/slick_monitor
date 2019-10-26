@@ -2,7 +2,6 @@ import logging
 from subprocess import check_output
 import re
 import requests
-from termcolor import colored
 import paramiko
 import socket
 
@@ -106,7 +105,6 @@ class Http_test(Test):
             monitor.failed +=1
             monitor.status = False
 
-
 class Ssh_test(Test):
     def __init__(self, config):
         super().__init__(config)    
@@ -127,7 +125,6 @@ class Ssh_test(Test):
         except Exception as er:
             Ping_test.set_result(monitor, 'fail', 'Failed SSH connection with error: {}'.format(er))
 
-
 class Tcp_test(Test):
     def __init__(self,config):
         super().__init__(config)
@@ -143,9 +140,6 @@ class Tcp_test(Test):
             Ping_test.set_result(monitor, 'success', 'Successful TCP connection to {}'.format(self.hostname))
         except Exception as er:
             Ping_test.set_result(monitor, 'fail', 'Failed TCP connection with error: {}'.format(er))
-
-
-
 
 class Test_Factory():
    def create_test(self, typ, config):

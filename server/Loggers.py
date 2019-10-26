@@ -6,14 +6,21 @@ import json
 from queue import Queue
 import builtins
 from logging.handlers import QueueHandler
+from colorlog import ColoredFormatter
+
+
+COLOR_LOGGING_FORMAT = ColoredFormatter(' %(asctime)s | %(log_color)s%(levelname)-5s%(reset)s | %(module)-7s | %(log_color)s%(message)s%(reset)s')
 LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s - %(module)s')
 
 
-
-# setting up module logger
+# setting up local logger
 loggers_logger = logging.getLogger(__name__)
 loggers_logger.propagate = False
 loggers_logger.setLevel(logging.DEBUG)
+s_handler = logging.StreamHandler()
+s_handler.setFormatter(COLOR_LOGGING_FORMAT)
+s_handler.setLevel(logging.DEBUG)
+loggers_logger.addHandler(s_handler)
 
 class Netcat_handler(logging.Handler):
     def __init__(self, hostname, port):
@@ -22,14 +29,16 @@ class Netcat_handler(logging.Handler):
             self.name = 'netcat_handler'
             self.hostname = hostname
             self.port = port          
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.connect((self.hostname, int(self.port)))
-           
-            self.init = True
+            self.nc_connect()
             loggers_logger.debug('Netcat handler is initialized')
         except Exception as error:
             self.init = False
-            loggers_logger.error('Failed to initialized Nc_handler. Error:'.format(error))
+            loggers_logger.error('Failed to initialized Nc_handler. Error: {}'.format(error))
+
+    def nc_connect(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((self.hostname, int(self.port)))
+        self.init = True
 
     def __repr__(self):
         return 'Netcat Handler: {}, {}'.format(self.hostname, self.port)
@@ -51,6 +60,9 @@ class Netcat_handler(logging.Handler):
             log_entry = self.format(record)
             try:
                 self.socket.send((log_entry + '\n').encode())
+            except BrokenPipeError as error:
+                self.nc_connect()
+                loggers_logger.error('Failed to send log to netcat host. Please ensure netcat is configured on host {} , port {}. Error: {}'.format(self.hostname, self.port, error))
             except Exception as error:
                 loggers_logger.error('Failed emit. Error: {}'.format(error))
         else:
@@ -72,7 +84,7 @@ def get_logging_config():
 def get_console_handler(settings):
     c_handler = logging.StreamHandler()
     c_handler.setLevel(settings['logging_level'])
-    c_handler.setFormatter(LOGGING_FORMAT)
+    c_handler.setFormatter(COLOR_LOGGING_FORMAT)
     c_handler.name = 'console_handler'
     return c_handler
     
@@ -89,7 +101,7 @@ def get_netcat_handler(settings):
     hostname = settings['hostname']
     port = settings['port']
     nc_handler = Netcat_handler(hostname, port)
-    nc_handler.setFormatter(LOGGING_FORMAT)
+    nc_handler.setFormatter(COLOR_LOGGING_FORMAT)
     nc_handler.setLevel(settings['logging_level'])
     return nc_handler
 
@@ -107,7 +119,6 @@ def get_logging_handler(log_type, settings):
     except:
         return None
 
-
 def get_handlers():
     logging_config = get_logging_config()
     handlers = []
@@ -117,7 +128,6 @@ def get_handlers():
             handlers.append(log_handler)
 
     return tuple(handlers)        
-
 
 builtins.log_queue = Queue(-1)
 def get_queue_logger(log_level, module_name):
