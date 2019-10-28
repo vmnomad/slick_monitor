@@ -48,7 +48,7 @@ class Netcat_handler(logging.Handler):
     def __repr__(self):
         return 'Netcat Handler: {}, {}'.format(self.hostname, self.port)
 
-    def update(self, hostname, port, logging_level):
+    def update(self, hostname, port):
         if self.hostname != hostname or \
            self.port != port:
             self.socket.close
@@ -57,8 +57,6 @@ class Netcat_handler(logging.Handler):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.hostname, int(self.port)))
             loggers_logger.debug('Updated Netcat Handler. New hostname: {}, new port: {}'.format(self.hostname, self.port))
-        self.setLevel(logging_level)
-        loggers_logger.debug('Updated Netcat Handler. New logging level: {}'.format(logging_level))
 
     def emit(self, record):
         if self.init == True:
@@ -184,10 +182,11 @@ def add_handler(handlers, h_name, h_settings):
 
     return handlers
 
-
 def update_handlers(logger):
     configuration = get_logging_config()
     #print(configuration.keys())
+
+    # disable / enable handlers
     for h_config_name, h_config_settings in configuration.items():
     
         h_name = h_config_name + '_handler'
@@ -204,8 +203,19 @@ def update_handlers(logger):
             if h_index == -1:
                 logger.handlers = add_handler(logger.handlers, h_name, h_config_settings)
                 loggers_logger.info('Handler {} was enabled'.format(h_name))
-
-
+    
+        # change netcat handler configuration
+        if h_name  == 'netcat_handler':
+            h_index = get_handler_index(logger, h_name)
+            if h_index != -1:
+                for setting, value in h_config_settings.items():                    
+                    if setting == 'enabled' or setting == 'logging_level':
+                        continue
+                    elif getattr(logger.handlers[h_index], setting) != value:
+                        print(getattr(logger.handlers[h_index], setting))
+                        loggers_logger.info('Update netcat configuration')
+                        logger.handlers[h_index].update(h_config_settings['hostname'], h_config_settings['port']) 
+    
 # temp disabled
 def update_logger(logger):
     handlers = logger.handlers
