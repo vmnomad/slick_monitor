@@ -8,8 +8,9 @@ import socket
 from Utils import decrypt
 import Loggers
 
-# disables Paramiko logging
-logging.getLogger("paramiko").setLevel(logging.WARNING)
+# lowers Paramiko logging level and disabled propagation to root logger
+logging.getLogger("paramiko").setLevel(logging.CRITICAL)
+logging.getLogger("paramiko").propagate = False
 
 # setting up module logger
 tests_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
