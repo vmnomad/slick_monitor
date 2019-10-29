@@ -170,7 +170,7 @@ while True:
             #logger.info(message)
             main_logger.info(colored('{}'.format(message), 'red'))
     
-    time.sleep(1)
+    time.sleep(2)
 
 listener.stop()
 

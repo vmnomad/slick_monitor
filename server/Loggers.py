@@ -13,13 +13,29 @@ COLOR_LOGGING_FORMAT = ColoredFormatter(' %(asctime)s | %(log_color)s%(levelname
 LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s - %(module)s')
 
 
+def get_logging_config():
+
+    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.execute("SELECT * from LOGGERS")
+    result = cursor.fetchall()
+
+    loggers_configuration = {}
+    for item in result:
+        loggers_configuration[item['type']] =json.loads(item['settings'])
+    loggers_logger.debug('Loaded loggers configuration')
+    return loggers_configuration
+
+
 # setting up local logger
 loggers_logger = logging.getLogger(__name__)
 loggers_logger.propagate = False
-loggers_logger.setLevel(logging.INFO)
+logging_config = get_logging_config()
+loggers_logger.setLevel(logging.DEBUG)
 s_handler = logging.StreamHandler()
 s_handler.setFormatter(COLOR_LOGGING_FORMAT)
-s_handler.setLevel(logging.DEBUG)
+level = logging_config['console']['logging_level']
+s_handler.setLevel(level)
 loggers_logger.addHandler(s_handler)
 
 class Netcat_handler(logging.Handler):
@@ -72,18 +88,6 @@ class Netcat_handler(logging.Handler):
         else:
             loggers_logger.warning('Failed emit. Netcat logger is not initialized.')
 
-def get_logging_config():
-
-    conn = sqlite3.connect('server.db', timeout=5.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.execute("SELECT * from LOGGERS")
-    result = cursor.fetchall()
-
-    loggers_configuration = {}
-    for item in result:
-        loggers_configuration[item['type']] =json.loads(item['settings'])
-    loggers_logger.debug('Loaded loggers configuration')
-    return loggers_configuration
 
 def get_console_handler(settings):
     c_handler = logging.StreamHandler()
