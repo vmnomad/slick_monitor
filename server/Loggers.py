@@ -16,7 +16,7 @@ LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s -
 # setting up local logger
 loggers_logger = logging.getLogger(__name__)
 loggers_logger.propagate = False
-loggers_logger.setLevel(logging.INFO)
+loggers_logger.setLevel(logging.DEBUG)
 s_handler = logging.StreamHandler()
 s_handler.setFormatter(COLOR_LOGGING_FORMAT)
 s_handler.setLevel(logging.DEBUG)
@@ -111,15 +111,19 @@ def get_netcat_handler(settings):
 
 def get_logging_handler(log_type, settings):
     try:
-        if log_type == 'console' and settings['enabled'] == 1:
-            return get_console_handler(settings)
-        elif log_type == 'file' and settings['enabled'] == 1:
-            return get_file_handler(settings)
-        elif log_type == 'netcat' and settings['enabled'] == 1:
-            return get_netcat_handler(settings)
-        else:
-            loggers_logger.error('Cannot find logging handler type: {}'.format(log_type))
+        if settings['enabled'] == 0:
+            loggers_logger.debug('Logger {} is disabled.'.format(log_type))
             return None
+        else:
+            if log_type == 'console':
+                return get_console_handler(settings)
+            elif log_type == 'file':
+                return get_file_handler(settings)
+            elif log_type == 'netcat':
+                return get_netcat_handler(settings)
+            else:
+                loggers_logger.error('Unknown logging handler {}'.format(log_type))
+                return None
     except:
         return None
 

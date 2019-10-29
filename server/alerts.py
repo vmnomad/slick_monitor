@@ -12,9 +12,7 @@ import Loggers
 
 from Utils import decrypt, load_alerts
 
-
 alerts_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
-
 
 class Alert:
     def fail(self):
@@ -74,7 +72,7 @@ Error Info: %s """ % (
                 monitor.alert_time = datetime.datetime.now()
 
             except Exception as er:
-                alerts_logger.exception('Failed to send email: {}, {}. Error: {}'.format(monitor.hostname, monitor.type, er))
+                alerts_logger.exception('Failed to send email: {}, {}. Error:'.format(monitor.hostname, monitor.type))
             
         else:
             alerts_logger.debug('Skipping email alert, alert interval has not expired yet')
