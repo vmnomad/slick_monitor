@@ -29,17 +29,18 @@ utils_logger = Loggers.get_queue_logger(logging.DEBUG, __name__)
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 def load_alerts():
-    conn = sqlite3.connect('server.db', timeout=5.0)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.execute("SELECT * from ALERTS")
-    result = cursor.fetchall()
+    try:
+        conn = sqlite3.connect('server.db', timeout=5.0)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * from ALERTS")
+        result = cursor.fetchall()
 
-    alerts = {}
-    for alert in result:
-        alerts[alert['type']] =json.loads(alert['settings'])
-
-    return alerts
-
+        alerts = {}
+        for alert in result:
+            alerts[alert['type']] =json.loads(alert['settings'])
+        return alerts
+    except Exception as error:
+        utils_logger.error('Failed to load alerts configuration. Error: {}'.format(error))
 def get_key():
     key = os.getenv('MONITOR_KEY')
     return key
@@ -67,6 +68,7 @@ def decrypt(secret):
 
 
 def load_monitors():
+    try:
         conn = sqlite3.connect(DB_NAME, timeout=5.0)
         conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * from MONITORS")
@@ -79,10 +81,10 @@ def load_monitors():
             #temp_dict = ast.literal_eval(monitors[i]['params'])
             #monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
             monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
-        #raise Exception('error')
         conn.close()
-
         return monitors
+    except Exception as error:
+        sys.exit('Failed to load monitors. Error: {}'.format(error))
 
 class Stats(Thread):
     def __init__(self, name, interval):
