@@ -16,7 +16,7 @@ LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s -
 # setting up local logger
 loggers_logger = logging.getLogger(__name__)
 loggers_logger.propagate = False
-loggers_logger.setLevel(logging.DEBUG)
+loggers_logger.setLevel(logging.INFO)
 s_handler = logging.StreamHandler()
 s_handler.setFormatter(COLOR_LOGGING_FORMAT)
 s_handler.setLevel(logging.DEBUG)

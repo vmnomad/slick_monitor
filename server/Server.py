@@ -37,7 +37,7 @@ handlers = Loggers.get_handlers()
 
 # create queue listener
 listener = QueueListener(log_queue, *handlers, respect_handler_level=True)
-listener.start()
+
 ####### Main function starts here ########
 class Monitor_test(Thread):
 
@@ -156,8 +156,7 @@ except Exception as error:
 
 
 main_logger.info('All processes started successfully')
-
-
+listener.start()
 while True:
     Loggers.update_handlers(listener)
     if not queue.empty():

@@ -62,8 +62,6 @@ def decrypt(secret):
     secret = secret.encode('utf-8')
     cipher_suite = Fernet(key)
     decrypted_text = cipher_suite.decrypt(secret)
-
-    # returns string
     return decrypted_text.decode('utf-8') 
 
 
@@ -78,8 +76,6 @@ def load_monitors():
         monitors = [dict(row) for row in result]
 
         for i in range(len(monitors)):
-            #temp_dict = ast.literal_eval(monitors[i]['params'])
-            #monitors[i]['params'] = tuple([(k, v) for k,v in temp_dict.items()])
             monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
         conn.close()
         return monitors
