@@ -72,7 +72,7 @@ Error Info: %s """ % (
                 monitor.alert_time = datetime.datetime.now()
 
             except Exception as er:
-                alerts_logger.exception('Failed to send email: {}, {}. Error:'.format(monitor.hostname, monitor.type))
+                alerts_logger.exception('Failed to send email: {}, {}. Error: {}'.format(monitor.hostname, monitor.type, er))
             
         else:
             alerts_logger.debug('Skipping email alert, alert interval has not expired yet')
