@@ -13,7 +13,7 @@ def default(request):
         if request.user.is_authenticated:
             return render (request, 'monitors.html')
         else:
-            return render(request, 'login.html')
+            return redirect(reverse('login'))
 
 def change_password(request):
     
