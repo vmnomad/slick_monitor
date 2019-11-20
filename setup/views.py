@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,reverse
 from django.shortcuts import HttpResponse
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
 
@@ -11,7 +11,7 @@ def default(request):
         return render(request, 'welcome.html')
     else:
         if request.user.is_authenticated:
-            render (request, 'monitors.html')
+            return render (request, 'monitors.html')
         else:
             return render(request, 'login.html')
 
@@ -24,15 +24,24 @@ def change_password(request):
     user.save()
     return render(request, 'login.html')
 
-def login(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    print(username)
-    print(password)
-    user = authenticate(username=username, password=password)
-    print('User', user)
-    if user is not None:
-        return redirect('/settings/')
+def my_login(request):
+    if request.method == 'GET':
+        return render(request, 'login.html')
+    elif request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        print(username)
+        print(password)
+        user = authenticate(username=username, password=password)
+        print('User', user)
+        if user is not None:
+            login(request, user)
+            return redirect(reverse('settings'))
+        else:
+            context = {"message": 'wrong password'}
+            print('Context:', context)
+            return render(request, 'login.html', context=context)
+        
 
 @login_required
 def settings(request):
