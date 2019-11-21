@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect,reverse
 from django.shortcuts import HttpResponse
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 
@@ -16,9 +16,7 @@ def default(request):
             return redirect(reverse('login'))
 
 def change_password(request):
-    
     new_password = request.POST.get('inputPassword1')
-    
     user = User.objects.get(username='admin')    
     user.set_password(new_password)
     user.save()
@@ -42,6 +40,11 @@ def my_login(request):
             print('Context:', context)
             return render(request, 'login.html', context=context)
         
+
+@login_required
+def my_logout(request):
+    logout(request)
+    return render(request, 'login.html')
 
 @login_required
 def settings(request):
