@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 def default(request):
     if(authenticate(username='admin', password='VMware1!')):
-        return render(request, 'welcome.html')
+        return render(request, 'change_password.html')
     else:
         if request.user.is_authenticated:
             return render (request, 'monitors.html')
@@ -16,12 +16,20 @@ def default(request):
             return redirect(reverse('login'))
 
 def change_password(request):
-    new_password = request.POST.get('inputPassword1')
-    user = User.objects.get(username='admin')    
-    user.set_password(new_password)
-    user.save()
-    return render(request, 'login.html')
-
+    if request.method == 'GET':
+        return render(request, 'change_password.html')
+    else:
+        current_password = request.POST.get('currentPassword')
+        new_password = request.POST.get('inputPassword1')
+        if authenticate(username='admin', password=current_password) is not None:
+            user = User.objects.get(username='admin')    
+            user.set_password(new_password)
+            user.save()
+            return render(request, 'login.html')
+        else:
+            # TODO generate warning message
+            return render(request, 'change_password.html')
+        
 def my_login(request):
     if request.method == 'GET':
         return render(request, 'login.html')
@@ -39,7 +47,6 @@ def my_login(request):
             context = {"message": 'wrong password'}
             print('Context:', context)
             return render(request, 'login.html', context=context)
-        
 
 @login_required
 def my_logout(request):
@@ -48,4 +55,5 @@ def my_logout(request):
 
 @login_required
 def settings(request):
-    return HttpResponse('Placeholder for settings')
+    return render(request, 'settings.html')
+    #return HttpResponse('Placeholder for settings')
