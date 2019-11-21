@@ -57,3 +57,11 @@ def my_logout(request):
 def settings(request):
     return render(request, 'settings.html')
     #return HttpResponse('Placeholder for settings')
+
+@login_required
+def settings_email(request):
+    return render(request, 'settings_email.html')
+
+@login_required
+def settings_slack(request):
+    return render(request, 'settings_slack.html')

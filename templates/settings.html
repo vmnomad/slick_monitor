@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row" style="padding-top: 40px; font-size: 14px; font-family: 'Quicksand', sans-serif;">
+    <div class="col col-sm-2">
+        <nav class="nav flex-column bg-white shadow-sm font-italic rounded p-3">
+            <a href="{% url 'email' %}" class="nav-link px-4 rounded-pill">
+                <i class="fa fa-pie-chart mr-2"></i>
+                Email
+            </a>
+            <a href="{% url 'slack' %}" class="nav-link px-4 active bg-primary text-white shadow-sm rounded-pill">
+                <i class="fa fa-line-chart mr-2"></i>
+                Slack
+            </a>
+
+        </nav>Î
+
+    </div>
+
+    {% block settings %}{% endblock %}
+
+</div>
+
+{% endblock %}
