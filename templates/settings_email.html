@@ -4,7 +4,7 @@
 
 <div class="col col-sm-4 text-left">
 
-    <form action='/settings/' method="post"> {% csrf_token %}
+    <form action="{% url 'email' %}" method="post"> {% csrf_token %}
 
         <h3>Email settings</h1>
             <div class="form-group">

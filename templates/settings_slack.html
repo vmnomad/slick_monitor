@@ -4,7 +4,7 @@
 
 <div class="col col-sm-4 text-left">
 
-    <form action='/settings/' method="post"> {% csrf_token %}
+    <form action="{% url 'slack' %}" method="post"> {% csrf_token %}
 
         <h3>Slack settings</h1>
 

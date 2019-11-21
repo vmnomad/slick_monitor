@@ -55,13 +55,14 @@ def my_logout(request):
 
 @login_required
 def settings(request):
-    return render(request, 'settings.html')
-    #return HttpResponse('Placeholder for settings')
+    return render(request, 'settings_email.html')
 
 @login_required
 def settings_email(request):
-    return render(request, 'settings_email.html')
-
+    if request.method == 'GET':
+        return render(request, 'settings_email.html')
+    elif request.method == 'POST':
+        return HttpResponse("Placeholder to update settings")
 @login_required
 def settings_slack(request):
     return render(request, 'settings_slack.html')
