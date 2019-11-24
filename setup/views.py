@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect,reverse
-from django.shortcuts import HttpResponse
+from django.shortcuts import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
+import json
+from .forms import NameForm, EmailSettingsForm
 
 # Create your views here.
 def default(request):
@@ -15,6 +16,7 @@ def default(request):
         else:
             return redirect(reverse('login'))
 
+@login_required
 def change_password(request):
     if request.method == 'GET':
         return render(request, 'change_password.html')
@@ -35,11 +37,9 @@ def my_login(request):
         return render(request, 'login.html')
     elif request.method == 'POST':
         username = request.POST.get('username')
-        password = request.POST.get('password')
-        print(username)
-        print(password)
+        password = request.POST.get('password')        
         user = authenticate(username=username, password=password)
-        print('User', user)
+
         if user is not None:
             login(request, user)
             return redirect(reverse('settings'))
@@ -55,14 +55,53 @@ def my_logout(request):
 
 @login_required
 def settings(request):
-    return render(request, 'settings_email.html')
+    form = EmailSettingsForm()
+    return render(request, 'settings_email.html', {'form': form})
+
 
 @login_required
 def settings_email(request):
+    if request.method == 'POST':
+
+        # create a form instance and populate it with data from the request:
+        form = EmailSettingsForm(request.POST)
+
+        # check whether it's valid:
+        if form.is_valid():
+            my_keys = form.cleaned_data.copy()
+            print(json.dumps(my_keys))
+
+            # place data into database
+            # ...
+            # redirect to a new URL:
+            return HttpResponse("Placeholder to update email settings")
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # read data from the database
+
+        # data = {'smtp': 'host'}
+        #form = EmailSettingsForm(data=data)
+
+        form = EmailSettingsForm()
+
+    return render(request, 'settings_email.html', {'form': form})
+
+@login_required
+def settings_email_old(request):
     if request.method == 'GET':
         return render(request, 'settings_email.html')
     elif request.method == 'POST':
-        return HttpResponse("Placeholder to update settings")
+        my_keys = request.POST.copy()
+        my_keys.pop('csrfmiddlewaretoken', None)
+        print(json.dumps(my_keys))
+        for key, val in my_keys.items():
+            print(key, val)
+        return HttpResponse("Placeholder to update email settings")
+        
 @login_required
 def settings_slack(request):
-    return render(request, 'settings_slack.html')
+    if request.method == 'GET':
+        return render(request, 'settings_slack.html')
+    elif request.method == 'POST':
+        return HttpResponse("Placeholder to update slack settings")
