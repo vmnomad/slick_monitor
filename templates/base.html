@@ -8,7 +8,7 @@
 
     <!-- Jquery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    
+
     <!-- Bootstrap CSS -->
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -91,6 +91,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
     </script>
+
+    <!-- Active Navbar Element-->
     <script>
         $(document).ready(function () {
             // get current URL path and assign 'active' class
@@ -102,6 +104,20 @@
             $('.navbar-nav > li > a[href="' + pathname + '"]').parent().addClass('active');
         })
     </script>
+
+    <!-- Active Settings Element-->
+    <script>
+        $(document).ready(function () {
+            // get current URL path and assign 'active' class
+            var pathname = window.location.pathname;
+            console.log(pathname)
+            //pathname = pathname.substring(0, pathname.length - 1);
+            
+            console.log($('.nav > a'))
+            $('.nav > a[href="' + pathname + '"]').addClass('bg-primary text-white');
+        })
+    </script>
+
 </body>
 
 </html>

@@ -3,3 +3,5 @@ server/keys/
 server/logs/
 server/archive/
 server/encrypt_credentials.py
+templates/archive/settings_email_old.html
+templates/archive/settings_slack_old.html

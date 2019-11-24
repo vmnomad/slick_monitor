@@ -99,9 +99,30 @@ class EmailSettingsForm(forms.Form):
             })
     )
 
-{
 
 
 
-    "ssl": "on"
-}
+class SlackSettingsForm(forms.Form):
+    # Slack Webhook
+    webhook = forms.CharField(
+        label='Slack Webhook',
+        required = True,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'https://hooks.slack.com/services/XXXX/XXXX',
+                'class' : 'form-control'
+            })
+    )
+
+    # Alert Interval
+    alert_interval = forms.IntegerField(
+        label='Alert Interval',
+        required = True,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '60',
+                'class' : 'form-control'
+            }),
+        max_value = 86400,
+        min_value= 60
+    )
