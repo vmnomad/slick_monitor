@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 import json
 from .forms import NameForm, EmailSettingsForm, SlackSettingsForm
 
+from setup.models import Alerts
+
 # Create your views here.
 def default(request):
     if(authenticate(username='admin', password='VMware1!')):
@@ -55,9 +57,7 @@ def my_logout(request):
 
 @login_required
 def settings(request):
-    form = EmailSettingsForm()
     return redirect(reverse('email'))
-    #return render(request, 'settings_email.html', {'form': form})
 
 
 @login_required
