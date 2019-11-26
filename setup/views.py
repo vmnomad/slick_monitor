@@ -69,22 +69,38 @@ def settings_email(request):
 
         # check whether it's valid:
         if form.is_valid():
-            my_keys = form.cleaned_data.copy()
-            print(json.dumps(my_keys))
 
-            # place data into database
-            # ...
+            # get data from the form
+            email_settings = form.cleaned_data.copy()
+
+            # stringify DICT to JSON
+            print(json.dumps(email_settings))
+            email_settings = json.dumps(email_settings)
+
+            # if email settings exist:
+            if len(Alerts.objects.filter(type="email")) == 1:
+                email_alert = Alerts.objects.get(type="email")
+                email_alert.settings = email_settings
+                email_alert.save()
+
+            # create new settings
+            else:
+                email_alert = Alerts(type="email", settings=email_settings)
+                email_alert.save()
+            # 
             # redirect to a new URL:
-            return HttpResponse("Placeholder to update email settings")
+            return redirect(reverse('email'))
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        # read data from the database
+        if len(Alerts.objects.filter(type="email")) == 1:
+                email_alert = Alerts.objects.get(type="email")  
+                email_settings = json.loads(email_alert.settings)
+        else:
+            form = EmailSettingsForm()
+            return render(request, 'settings_email.html', {'form': form})
 
-        # data = {'smtp': 'host'}
-        #form = EmailSettingsForm(data=data)
-
-        form = EmailSettingsForm()
+        form = EmailSettingsForm(email_settings)
 
     return render(request, 'settings_email.html', {'form': form})
 
@@ -98,22 +114,36 @@ def settings_slack(request):
 
         # check whether it's valid:
         if form.is_valid():
-            my_keys = form.cleaned_data.copy()
-            print(json.dumps(my_keys))
+            slack_settings = form.cleaned_data.copy()
 
-            # place data into database
-            # ...
+            # stringify DICT to JSON
+            print(json.dumps(slack_settings))
+            slack_settings = json.dumps(slack_settings)
+
+            # if slack settings exist:
+            if len(Alerts.objects.filter(type="slack")) == 1:
+                slack_alert = Alerts.objects.get(type="slack")
+                slack_alert.settings = slack_settings
+                slack_alert.save()
+
+            # create new settings
+            else:
+                slack_alert = Alerts(type="slack", settings=slack_settings)
+                slack_alert.save()
+            # 
             # redirect to a new URL:
-            return HttpResponse("Placeholder to update slack settings")
+            return redirect(reverse('slack'))
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        # read data from the database
+        if len(Alerts.objects.filter(type="slack")) == 1:
+                slack_alert = Alerts.objects.get(type="slack")  
+                slack_settings = json.loads(slack_alert.settings)
+        else:
+            form = SlackSettingsForm()
+            return render(request, 'settings_slack.html', {'form': form})
 
-        # data = {'smtp': 'host'}
-        #form = EmailSettingsForm(data=data)
-
-        form = SlackSettingsForm()
+        form = SlackSettingsForm(slack_settings)
 
     return render(request, 'settings_slack.html', {'form': form})
 
