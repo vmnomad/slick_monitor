@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row" style="padding-top: 40px; font-size: 13px; font-family: 'Quicksand', sans-serif;">
+    <div class="col col-sm-2">
+        <nav class="nav flex-column bg-white rounded p-3">
+            <a href="{% url 'console' %}" class="nav-link px-4 rounded-pill">
+                <i class="fa fa-pie-chart mr-2"></i>
+                Console
+            </a>
+            <a href="{% url 'file' %}" class="nav-link px-4 rounded-pill">
+                <i class="fa fa-line-chart mr-2"></i>
+                File
+            </a>
+
+            <a href="{% url 'netcat' %}" class="nav-link px-4 rounded-pill">
+                <i class="fa fa-line-chart mr-2"></i>
+                Netcat
+            </a>
+
+        </nav>
+
+    </div>
+
+    {% block settings %}{% endblock %}
+
+</div>
+
+{% endblock %}

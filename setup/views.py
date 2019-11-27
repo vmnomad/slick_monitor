@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import json
-from .forms import NameForm, EmailSettingsForm, SlackSettingsForm
+from .forms import EmailAlertForm, SlackAlertForm, ConsoleLoggingForm, FileLoggingForm, NetcatLoggingForm
 
-from setup.models import Alerts
+from setup.models import Alerts, Loggers
 
 # Create your views here.
 def default(request):
@@ -44,10 +44,9 @@ def my_login(request):
 
         if user is not None:
             login(request, user)
-            return redirect(reverse('settings'))
+            return redirect(reverse('default'))
         else:
             context = {"message": 'wrong password'}
-            print('Context:', context)
             return render(request, 'login.html', context=context)
 
 @login_required
@@ -56,16 +55,19 @@ def my_logout(request):
     return render(request, 'login.html')
 
 @login_required
-def settings(request):
+def alerts(request):
     return redirect(reverse('email'))
 
+@login_required
+def loggers(request):
+    return redirect(reverse('console'))
 
 @login_required
-def settings_email(request):
+def alerts_email(request):
     if request.method == 'POST':
 
         # create a form instance and populate it with data from the request:
-        form = EmailSettingsForm(request.POST)
+        form = EmailAlertForm(request.POST)
 
         # check whether it's valid:
         if form.is_valid():
@@ -97,27 +99,25 @@ def settings_email(request):
                 email_alert = Alerts.objects.get(type="email")  
                 email_settings = json.loads(email_alert.settings)
         else:
-            form = EmailSettingsForm()
-            return render(request, 'settings_email.html', {'form': form})
+            form = EmailAlertForm()
+            return render(request, 'alerts_email.html', {'form': form})
 
-        form = EmailSettingsForm(email_settings)
+        form = EmailAlertForm(email_settings)
 
-    return render(request, 'settings_email.html', {'form': form})
+    return render(request, 'alerts_email.html', {'form': form})
 
 
 @login_required
-def settings_slack(request):
+def alerts_slack(request):
     if request.method == 'POST':
-
         # create a form instance and populate it with data from the request:
-        form = SlackSettingsForm(request.POST)
+        form = SlackAlertForm(request.POST)
 
         # check whether it's valid:
         if form.is_valid():
             slack_settings = form.cleaned_data.copy()
 
             # stringify DICT to JSON
-            print(json.dumps(slack_settings))
             slack_settings = json.dumps(slack_settings)
 
             # if slack settings exist:
@@ -136,39 +136,149 @@ def settings_slack(request):
 
     # if a GET (or any other method) we'll create a blank form
     else:
+        # return prepopulated form
         if len(Alerts.objects.filter(type="slack")) == 1:
                 slack_alert = Alerts.objects.get(type="slack")  
                 slack_settings = json.loads(slack_alert.settings)
+                form = SlackAlertForm(slack_settings)
+                return render(request, 'alerts_slack.html', {'form': form})
+        # return empty form
         else:
-            form = SlackSettingsForm()
-            return render(request, 'settings_slack.html', {'form': form})
-
-        form = SlackSettingsForm(slack_settings)
-
-    return render(request, 'settings_slack.html', {'form': form})
-
-
-
-
-
-# archive
-@login_required
-def settings_email_old(request):
-    if request.method == 'GET':
-        return render(request, 'settings_email.html')
-    elif request.method == 'POST':
-        my_keys = request.POST.copy()
-        my_keys.pop('csrfmiddlewaretoken', None)
-        print(json.dumps(my_keys))
-        for key, val in my_keys.items():
-            print(key, val)
-        return HttpResponse("Placeholder to update email settings")
-
+            form = SlackAlertForm()
+            return render(request, 'alerts_slack.html', {'form': form})
 
 @login_required
-def settings_slack_old(request):
-    if request.method == 'GET':
-        return render(request, 'settings_slack.html')
-    elif request.method == 'POST':
-        return HttpResponse("Placeholder to update slack settings")
+def loggers_console(request):
+    logger_type = 'console'
+    template_data = {'url_name' : logger_type}
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = ConsoleLoggingForm(request.POST)
 
+        # check whether it's valid:
+        if form.is_valid():
+            logger_settings = form.cleaned_data.copy()
+
+            # stringify DICT to JSON
+            logger_settings = json.dumps(logger_settings)
+
+            # if slack settings exist:
+            if len(Loggers.objects.filter(type=logger_type)) == 1:
+                logger = Loggers.objects.get(type=logger_type)
+                logger.settings = logger_settings
+                logger.save()
+
+            # create new settings
+            else:
+                logger = Loggers(type=logger_type, settings=logger_settings)
+                logger.save()
+
+            # redirect to a current form:
+            return redirect(reverse(logger_type))
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # return prepopulated form
+        if len(Loggers.objects.filter(type=logger_type)) == 1:
+                
+                # get current config
+                logger = Loggers.objects.get(type=logger_type)  
+                logger_settings = json.loads(logger.settings)
+                
+                # pre-populate the form  
+                template_data['form'] = ConsoleLoggingForm(logger_settings)
+                return render(request, 'loggers_form.html', template_data)
+        # return empty form
+        else:
+            template_data['form']  = ConsoleLoggingForm()
+            return render(request, 'loggers_form.html', template_data)
+
+def loggers_netcat(request):
+    logger_type = 'netcat'
+    template_data = {'url_name' : logger_type}
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NetcatLoggingForm(request.POST)
+
+        # check whether it's valid:
+        if form.is_valid():
+            logger_settings = form.cleaned_data.copy()
+
+            # stringify DICT to JSON
+            logger_settings = json.dumps(logger_settings)
+
+            # if slack settings exist:
+            if len(Loggers.objects.filter(type=logger_type)) == 1:
+                logger = Loggers.objects.get(type=logger_type)
+                logger.settings = logger_settings
+                logger.save()
+
+            # create new settings
+            else:
+                logger = Loggers(type=logger_type, settings=logger_settings)
+                logger.save()
+
+            # redirect to a current form:
+            return redirect(reverse(logger_type))
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # return prepopulated form
+        if len(Loggers.objects.filter(type=logger_type)) == 1:
+                
+                # get current config
+                logger = Loggers.objects.get(type=logger_type)  
+                logger_settings = json.loads(logger.settings)
+                
+                # pre-populate the form  
+                template_data['form'] = NetcatLoggingForm(logger_settings)
+                return render(request, 'loggers_form.html', template_data)
+        # return empty form
+        else:
+            template_data['form']  = NetcatLoggingForm()
+            return render(request, 'loggers_form.html', template_data)
+
+def loggers_file(request):
+    logger_type = 'file'
+    template_data = {'url_name' : logger_type}
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = FileLoggingForm(request.POST)
+
+        # check whether it's valid:
+        if form.is_valid():
+            logger_settings = form.cleaned_data.copy()
+
+            # stringify DICT to JSON
+            logger_settings = json.dumps(logger_settings)
+
+            # if slack settings exist:
+            if len(Loggers.objects.filter(type=logger_type)) == 1:
+                logger = Loggers.objects.get(type=logger_type)
+                logger.settings = logger_settings
+                logger.save()
+
+            # create new settings
+            else:
+                logger = Loggers(type=logger_type, settings=logger_settings)
+                logger.save()
+
+            # redirect to a current form:
+            return redirect(reverse(logger_type))
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # return prepopulated form
+        if len(Loggers.objects.filter(type=logger_type)) == 1:
+                
+                # get current config
+                logger = Loggers.objects.get(type=logger_type)  
+                logger_settings = json.loads(logger.settings)
+                
+                # pre-populate the form  
+                template_data['form'] = FileLoggingForm(logger_settings)
+                return render(request, 'loggers_form.html', template_data)
+        # return empty form
+        else:
+            template_data['form']  = FileLoggingForm()
+            return render(request, 'loggers_form.html', template_data)

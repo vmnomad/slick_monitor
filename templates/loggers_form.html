@@ -1,0 +1,17 @@
+{% extends "settings_loggers.html" %}
+
+{% block settings %}
+
+<div class="col col-sm-3 text-left">
+
+    <div class="form-group">
+        <form action="{% url url_name %}" method="post"> {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" class="btn btn-primary" value="Submit">
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
