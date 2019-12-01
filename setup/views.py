@@ -14,7 +14,7 @@ def default(request):
         return render(request, 'change_password.html')
     else:
         if request.user.is_authenticated:
-            return render (request, 'monitors.html')
+            return redirect(reverse('dashboard'))
         else:
             return redirect(reverse('login'))
 
@@ -112,7 +112,7 @@ def alerts_slack(request):
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
         form = SlackAlertForm(request.POST)
-
+        print(request.POST.values)
         # check whether it's valid:
         if form.is_valid():
             slack_settings = form.cleaned_data.copy()

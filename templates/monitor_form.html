@@ -1,0 +1,8 @@
+<form action="{% url url_name %}" method="post"> {% csrf_token %}
+        {{ form.as_p }}
+
+        
+        <button class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i>
+            Submit</button>
+    </form>

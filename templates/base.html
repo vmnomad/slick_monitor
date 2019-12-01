@@ -16,6 +16,12 @@
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR|Quicksand&display=swap" rel="stylesheet">
     <title>Slick Monitor</title>
 
+    <!-- Icons Library-->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+
+
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'image/favicon.ico' %}" />
 </head>
 
@@ -37,29 +43,30 @@
                     </li>
                 </ul>
 
-                
+
                 <ul class=" navbar-nav ml-auto">
-                    
+
                     {% if request.user.is_authenticated %}
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'change_password' %}">Change Pass</a>
                     </li>
-                    
+
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          Settings
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Settings
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                          <a class="dropdown-item" href="{% url 'alerts' %}">Alerts</a>
-                          <a class="dropdown-item" href="{% url 'loggers' %}">Loggers</a>
+                            <a class="dropdown-item" href="{% url 'alerts' %}">Alerts</a>
+                            <a class="dropdown-item" href="{% url 'loggers' %}">Loggers</a>
                         </div>
                     </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
                     </li>
-                    
+
                     {% endif %}
                 </ul>
 
@@ -109,11 +116,14 @@
             var pathname = window.location.pathname;
             console.log(pathname)
             //pathname = pathname.substring(0, pathname.length - 1);
-            
+
             console.log($('.nav > a'))
             $('.nav > a[href="' + pathname + '"]').addClass('bg-primary text-white');
         })
     </script>
+
+
+
 
 </body>
 

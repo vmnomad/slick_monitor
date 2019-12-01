@@ -6,6 +6,7 @@
 
     <div class="form-group">
         <form action="{% url 'slack' %}" method="post"> {% csrf_token %}
+            <input type="number" name='Test Field'></input>
             {{ form.as_p }}
             <input type="submit" class="btn btn-primary" value="Submit">
         </form>

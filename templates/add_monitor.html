@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="col col-md-4 text-left">
+
+    <div class="form-group">
+
+
+        <select id="select_dropdown" name="type" class="form-control" onchange="getForm()">
+            <option value="http">HTTP</option>
+            <option value="icmp">PING</option>
+
+        </select>
+
+        <div id="my_form">
+            <p></p>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+    function getForm() {
+        console.log('AJAX')
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("my_form").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "{% url url_name %}", true);
+
+        xhttp.send();
+    }
+</script>
+
+{% endblock %}
