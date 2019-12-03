@@ -1,22 +1,27 @@
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
-from .forms import SlackAlertForm, EmailAlertForm
+from .forms import PingMonitorForm, HttpMonitorForm, SshMonitorForm, TcpMonitorForm
 
 
 # temp view
 def test(request):
-    form = SlackAlertForm()
+    form = PingMonitorForm()
     return render(request, 'monitor_form.html', {'url_name': 'dashboard', 'form': form})
 
 
 def get_form(request, type):
     print('Type:', type)
     if type == 'ping':
-        form = SlackAlertForm()
+        form = PingMonitorForm()
     elif type == 'http':
-        form = EmailAlertForm()
-
+        form = HttpMonitorForm()
+    elif type == 'ssh':
+        form = SshMonitorForm()
+    elif type == 'tcp':
+        form = TcpMonitorForm()
     return render(request, 'monitor_form.html', {'url_name': 'test', 'form': form})
+
+
 
 # Create your views here.
 def dashboard(request):

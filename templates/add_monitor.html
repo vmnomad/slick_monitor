@@ -2,44 +2,49 @@
 
 {% block content %}
 
-<div class="col col-md-4 text-left">
+<div class="row" style="padding-top: 40px; font-size: 13px; font-family: 'Quicksand', sans-serif;">
+    <div class="col col-md-4>"></div>
+    <div class="col col-md-4 text-left">
 
-    <div class="form-group">
+        <div class="form-group">
 
 
-        <select id="select_dropdown" name="type" class="form-control" onchange="getForm()">
-            <option disabled="true" selected value="default">Select Monitor Type</option>
-            <option value="http">HTTP</option>
-            <option value="ping">PING</option>
+            <select id="select_dropdown" name="type" class="form-control" onchange="getForm()">
+                <option disabled="true" selected value="default">Select Monitor Type</option>
+                <option value="http">HTTP</option>
+                <option value="ping">PING</option>
+                <option value="ssh">SSH</option>
+                <option value="tcp">TCP</option>
 
-        </select>
+            </select>
 
-        <div id="my_form">
-            <p></p>
+            <div id="my_form">
+                <p></p>
+            </div>
+
         </div>
 
     </div>
-
+    <div class="col col-md-4>"></div>
 </div>
-
 
 
 <script>
     function getForm() {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
-            
+
 
             if (this.readyState == 4 && this.status == 200 && value != "default") {
 
-                
+
                 document.getElementById("my_form").innerHTML = this.responseText;
             }
         };
         var elem = document.getElementById("select_dropdown")
         value = elem.options[elem.selectedIndex].value
         console.log(value)
-        xhttp.open("GET", "/monitors/get_form/"+ value + "/", true);
+        xhttp.open("GET", "/monitors/get_form/" + value + "/", true);
 
         xhttp.send();
     }

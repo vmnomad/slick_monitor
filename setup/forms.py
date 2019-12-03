@@ -1,8 +1,6 @@
 from django import forms
 
 
-from django import forms
-
 LOGGING_LEVELS= [
     ('INFO', 'INFO'),
     ('DEBUG', 'DEBUG'),

@@ -1,10 +1,32 @@
 from django import forms
+from setup.models import Alerts
 
 
-class SlackAlertForm(forms.Form):
+ALERT_TYPES= [
+    ('Slack', 'slack'),
+    ('Email', 'email'),
+    ]
 
-    # Ping Webhook
-    webhook = forms.CharField(
+def get_alert_types():
+    alerts = Alerts.objects.values('type')
+    ALERT_TYPES = []
+    for al in alerts:
+        for k,v in al.items():
+            alert_type = (v.capitalize(), v)
+            ALERT_TYPES.append(alert_type)
+    if len(ALERT_TYPES) == 0:
+        ALERT_TYPES.append(('n/a', 'n/a'))
+    return ALERT_TYPES
+
+
+
+
+
+
+class PingMonitorForm(forms.Form):
+
+    # Ping 
+    hostname = forms.CharField(
         label='Hostname / IP Address',
         required = True,
         widget=forms.TextInput(
@@ -14,9 +36,22 @@ class SlackAlertForm(forms.Form):
             })
     )
 
-    # Alert Interval
-    alert_interval = forms.IntegerField(
-        label='Alert Interval',
+    # Count
+    count = forms.IntegerField(
+        label='Ping Count',
+        required = True,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '2',
+                'class' : 'form-control'
+            }),
+        max_value = 3,
+        min_value= 1
+    )
+
+    # Monitor Interval
+    interval = forms.IntegerField(
+        label='Ping Interval',
         required = True,
         widget=forms.NumberInput(
             attrs={
@@ -33,6 +68,78 @@ class SlackAlertForm(forms.Form):
         required = True,
         widget=forms.NumberInput(
             attrs={
+                'placeholder': '3',
+                'class' : 'form-control'
+            }),
+        max_value = 100,
+        min_value= 1
+    )
+
+
+    # Alet Type
+    alert_type = forms.CharField(
+        label='Alert Type',
+        required = True,
+        widget=forms.Select(
+            attrs={
+                'class' : 'form-control',
+                #'readonly' :'readonly'
+            },
+            choices = get_alert_types())
+    )
+
+    # Alert Enabled
+    alert_enabled = forms.BooleanField(
+        label='Enable Alert',
+        required = False,
+        widget=forms.CheckboxInput(
+            attrs={
+                'class' : 'form-control'
+            })
+    )
+
+
+class HttpMonitorForm(forms.Form):
+
+    # Hostname 
+    hostname = forms.CharField(
+        label='Hostname / IP Address',
+        required = True,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '192.168.1.1',
+                'class' : 'form-control'
+            })
+    )
+
+    # Allowed HTTP Code
+    allowed_codes = forms.IntegerField(
+        label='Allowed HTTP code',
+        required = False,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '200',
+                'class' : 'form-control'
+            })
+    )
+
+    # Regular expression 
+    regexp = forms.CharField(
+        label='Matching regexp',
+        required = False,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '^Python$',
+                'class' : 'form-control'
+            })
+    )
+
+    # Monitor Interval
+    interval = forms.IntegerField(
+        label='Ping Interval',
+        required = True,
+        widget=forms.NumberInput(
+            attrs={
                 'placeholder': '60',
                 'class' : 'form-control'
             }),
@@ -40,78 +147,72 @@ class SlackAlertForm(forms.Form):
         min_value= 60
     )
 
-
-
-
-
-
-LOGGING_LEVELS= [
-    ('INFO', 'INFO'),
-    ('DEBUG', 'DEBUG'),
-    ('ERROR', 'ERROR'),
-    ('WARNING', 'WARNING'),
-    ]
-
-class EmailAlertForm(forms.Form):
-    # SMTP Host
-    smtp_host = forms.CharField(
-        label='SMTP host',
-        required = True,
-        widget=forms.TextInput(
-            attrs={
-                'placeholder': 'smtp.gmail.com',
-                'class' : 'form-control'
-            })
-    )
-
-    # SMTP Port
-    smtp_port = forms.IntegerField(
-        label='SMTP port',
+     # FTT
+    ftt = forms.IntegerField(
+        label='Number of failures',
         required = True,
         widget=forms.NumberInput(
             attrs={
-                'placeholder': '587',
+                'placeholder': '3',
                 'class' : 'form-control'
-            })
+            }),
+        max_value = 100,
+        min_value= 1
     )
 
-    # Sender Email
-    from_addr = forms.EmailField(
-        label='Sender Address',
+
+    # Alet Type
+    alert_type = forms.CharField(
+        label='Alert Type',
         required = True,
-        widget=forms.EmailInput(
+        widget=forms.Select(
             attrs={
-                'placeholder': 'slick.monitor@lab.local',
+                'class' : 'form-control',
+                #'readonly' :'readonly'
+            },
+            choices = get_alert_types())
+    )
+
+    # Alert Enabled
+    alert_enabled = forms.BooleanField(
+        label='Enable Alert',
+        required = False,
+        widget=forms.CheckboxInput(
+            attrs={
                 'class' : 'form-control'
             })
     )
 
-    # Receiever Email
-    to_addr = forms.EmailField(
-        label='Receiver Address',
-        required = True,
-        widget=forms.EmailInput(
-            attrs={
-                'placeholder': 'lab_owner@lab.local',
-                'class' : 'form-control'
-            })
-    )
 
-    # Username
-    username = forms.CharField(
-        label='Username',
+
+class SshMonitorForm(forms.Form):
+
+    # Hostname 
+    hostname = forms.CharField(
+        label='Hostname / IP Address',
         required = True,
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'login.name',
+                'placeholder': '192.168.1.1',
                 'class' : 'form-control'
             })
     )
 
-    # Password
-    password = forms.CharField(
+    # SSH Username
+    username = forms.CharField(
+        label='Username',
+        required = False,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'admin',
+                'class' : 'form-control'
+            })
+    )
+
+    # SSH Password
+    regexp = forms.CharField(
         label='Password',
-        required = True,
+        required = False,
         widget=forms.PasswordInput(
             attrs={
                 'placeholder': '********',
@@ -119,9 +220,9 @@ class EmailAlertForm(forms.Form):
             })
     )
 
-    # Alert Interval
-    alert_interval = forms.IntegerField(
-        label='Alert Interval',
+    # Monitor Interval
+    interval = forms.IntegerField(
+        label='Ping Interval',
         required = True,
         widget=forms.NumberInput(
             attrs={
@@ -132,96 +233,35 @@ class EmailAlertForm(forms.Form):
         min_value= 60
     )
 
-    # SSL
-    ssl = forms.BooleanField(
-        label='Enable SSL',
-        required = False,
-        widget=forms.CheckboxInput(
-            attrs={
-                'class' : 'form-control'
-            })
-    )
-
-
-class ConsoleLoggingForm(forms.Form):
-    # Enable Logger
-    enabled = forms.BooleanField(
-        label='Enable Console Logging',
-        required = False,
-        widget=forms.CheckboxInput(
-            attrs={
-                'class' : 'form-control'
-            })
-    )
-
-    # Set Logging level
-    logging_level = forms.CharField(
-        label='Logging Level',
-        required = True,
-        widget=forms.Select(
-            attrs={
-                'class' : 'form-control',
-                #'readonly' :'readonly'
-            },
-            choices = LOGGING_LEVELS)
-    )
-
-class FileLoggingForm(forms.Form):
-    # Enable Logger
-    enabled = forms.BooleanField(
-        label='Enable File Logging',
-        required = False,
-        widget=forms.CheckboxInput(
-            attrs={
-                'class' : 'form-control'
-            })
-    )
-
-    # Set Logging level
-    logging_level = forms.CharField(
-        label='Logging Level',
-        required = True,
-        widget=forms.Select(
-            attrs={
-                'class' : 'form-control',
-                #'readonly' :'readonly'
-            },
-            choices = LOGGING_LEVELS)
-    )
-
-    # Set Logging File Size
-    file_size = forms.IntegerField(
-        label='Log File Size (MB)',
+     # FTT
+    ftt = forms.IntegerField(
+        label='Number of failures',
         required = True,
         widget=forms.NumberInput(
             attrs={
-                'placeholder': '1',
-                'class' : 'form-control',
-                #'readonly' :'readonly'
+                'placeholder': '3',
+                'class' : 'form-control'
             }),
-        max_value = 10,
-        min_value= 1
-    )
-
-    # Set Max Number of Log Files
-    file_number = forms.IntegerField(
-        label='Number of Log Files',
-        required = True,
-        widget=forms.NumberInput(
-            attrs={
-                'placeholder': '1',
-                'class' : 'form-control',
-                #'readonly' :'readonly'
-            }),
-        max_value = 10,
+        max_value = 100,
         min_value= 1
     )
 
 
-class NetcatLoggingForm(forms.Form):
-    # Enable Logger
-    enabled = forms.BooleanField(
-        label='Enable Netcat Logging',
+    # Alet Type
+    alert_type = forms.CharField(
+        label='Alert Type',
+        required = True,
+        widget=forms.Select(
+            attrs={
+                'class' : 'form-control',
+                #'readonly' :'readonly'
+            },
+            choices = get_alert_types())
+    )
+
+    # Alert Enabled
+    alert_enabled = forms.BooleanField(
+        label='Enable Alert',
         required = False,
         widget=forms.CheckboxInput(
             attrs={
@@ -229,36 +269,90 @@ class NetcatLoggingForm(forms.Form):
             })
     )
 
-    # Set Logging level
-    logging_level = forms.CharField(
-        label='Console Logging Level',
-        required = True,
-        widget=forms.Select(
-            attrs={
-                'class' : 'form-control',
-                #'readonly' :'readonly'
-            },
-            choices = LOGGING_LEVELS)
-    )
 
-    # Netcat Host
+
+class TcpMonitorForm(forms.Form):
+
+    # Hostname 
     hostname = forms.CharField(
-        label='Netcat hostname',
+        label='Hostname / IP Address',
         required = True,
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'ubuntu-1.lab.local',
+                'placeholder': '192.168.1.1',
                 'class' : 'form-control'
             })
     )
 
-    # SMTP Port
+    # Port
     port = forms.IntegerField(
-        label='Netcat port',
+        label='Port',
+        required = False,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '443',
+                'class' : 'form-control'
+            })
+    )
+
+    # Timeout
+    timeout = forms.IntegerField(
+        label='Timeout',
+        required = False,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '2',
+                'class' : 'form-control'
+            }),
+        min_value=1,
+        max_value=10
+    )
+
+    # Monitor Interval
+    interval = forms.IntegerField(
+        label='Ping Interval',
         required = True,
         widget=forms.NumberInput(
             attrs={
-                'placeholder': '1234',
+                'placeholder': '60',
+                'class' : 'form-control'
+            }),
+        max_value = 86400,
+        min_value= 60
+    )
+
+     # FTT
+    ftt = forms.IntegerField(
+        label='Number of failures',
+        required = True,
+        widget=forms.NumberInput(
+            attrs={
+                'placeholder': '3',
+                'class' : 'form-control'
+            }),
+        max_value = 100,
+        min_value= 1
+    )
+
+
+    # Alet Type
+    alert_type = forms.CharField(
+        label='Alert Type',
+        required = True,
+        widget=forms.Select(
+            attrs={
+                'class' : 'form-control',
+                #'readonly' :'readonly'
+            },
+            choices = get_alert_types())
+    )
+
+    # Alert Enabled
+    alert_enabled = forms.BooleanField(
+        label='Enable Alert',
+        required = False,
+        widget=forms.CheckboxInput(
+            attrs={
                 'class' : 'form-control'
             })
     )
