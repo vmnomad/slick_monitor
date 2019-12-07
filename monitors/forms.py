@@ -2,6 +2,9 @@ from django import forms
 from setup.models import Alerts
 
 
+
+
+
 ALERT_TYPES= [
     ('Slack', 'slack'),
     ('Email', 'email'),
@@ -24,6 +27,14 @@ def get_alert_types():
 
 
 class PingMonitorForm(forms.Form):
+
+    type = forms.CharField(
+        required = True,
+        widget=forms.HiddenInput(
+            attrs={
+                'value':'ping'
+            })
+    )
 
     # Ping 
     hostname = forms.CharField(
@@ -100,6 +111,15 @@ class PingMonitorForm(forms.Form):
 
 
 class HttpMonitorForm(forms.Form):
+
+    type = forms.CharField(
+        required = True,
+        widget=forms.HiddenInput(
+            attrs={
+                'value':'http'
+            })
+    )
+
 
     # Hostname 
     hostname = forms.CharField(
@@ -187,6 +207,14 @@ class HttpMonitorForm(forms.Form):
 
 class SshMonitorForm(forms.Form):
 
+    type = forms.CharField(
+        required = True,
+        widget=forms.HiddenInput(
+            attrs={
+                'value':'ssh'
+            })
+    )
+
     # Hostname 
     hostname = forms.CharField(
         label='Hostname / IP Address',
@@ -273,6 +301,14 @@ class SshMonitorForm(forms.Form):
 
 class TcpMonitorForm(forms.Form):
 
+    type = forms.CharField(
+        required = True,
+        widget=forms.HiddenInput(
+            attrs={
+                'value':'tcp'
+            })
+    )
+
     # Hostname 
     hostname = forms.CharField(
         label='Hostname / IP Address',
@@ -356,3 +392,15 @@ class TcpMonitorForm(forms.Form):
                 'class' : 'form-control'
             })
     )
+
+
+
+class Form_Factory():
+   def create_form(self, typ, request=False):
+
+        target_class = typ.capitalize() + "MonitorForm"
+        if request:
+            return globals()[target_class](request)
+        else: 
+            print('returning form:', target_class)
+            return globals()[target_class]()
