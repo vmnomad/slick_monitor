@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import json
 from .forms import EmailAlertForm, SlackAlertForm, ConsoleLoggingForm, FileLoggingForm, NetcatLoggingForm
+from .utils import encrypt, decrypt
 
 from setup.models import Alerts, Loggers
 
@@ -75,9 +76,13 @@ def alerts_email(request):
             # get data from the form
             email_settings = form.cleaned_data.copy()
 
+            # encrypt password
+            email_settings['password'] = encrypt(email_settings['password'])
+
             # stringify DICT to JSON
             print(json.dumps(email_settings))
             email_settings = json.dumps(email_settings)
+            
 
             # if email settings exist:
             if len(Alerts.objects.filter(type="email")) == 1:
@@ -115,10 +120,18 @@ def alerts_slack(request):
         print(request.POST.values)
         # check whether it's valid:
         if form.is_valid():
+
+            # get validated data from the form
             slack_settings = form.cleaned_data.copy()
+
+            # encrypt webhook
+            slack_settings['webhook'] = encrypt(slack_settings['webhook'])
 
             # stringify DICT to JSON
             slack_settings = json.dumps(slack_settings)
+
+            
+        
 
             # if slack settings exist:
             if len(Alerts.objects.filter(type="slack")) == 1:
@@ -140,6 +153,7 @@ def alerts_slack(request):
         if len(Alerts.objects.filter(type="slack")) == 1:
                 slack_alert = Alerts.objects.get(type="slack")  
                 slack_settings = json.loads(slack_alert.settings)
+                slack_settings['webhook'] = decrypt(slack_settings['webhook'])
                 form = SlackAlertForm(slack_settings)
                 return render(request, 'alerts_slack.html', {'form': form})
         # return empty form
