@@ -23,7 +23,9 @@ def get_form(request, type):
 @login_required
 def dashboard(request):
 
-    query_results = Monitors.objects.values('type', 'hostname')
+    query_results = Monitors.objects.values('hostname','type',)
+    for result in query_results:
+        result['state'] = 'circle-red'
     return render(request, 'monitors_dashboard.html', {'query_results': query_results})
 
 @login_required

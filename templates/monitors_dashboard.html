@@ -3,25 +3,33 @@
 {% block content %}
 
 
+
 <div class="col col-sm-6 mx-auto" style="padding-top: 100px; font-size: 20px; font-family: 'Quicksand', sans-serif;">
-   
+
    <p>Placeholder for dashboard</p>
 
    <table class="table">
       <tr>
-          <th>Type</th>
-          <th>Hostname</th>
+         <th>Hostname</th>
+         <th>Type</th>
+         <th>State</th>
       </tr>
       {% for item in query_results %}
-      <tr> 
-          <td>{{ item.type }}</td>
-          <td>{{ item.hostname }}</td>
+      <tr>
+         <td>{{ item.hostname }}</td>
+         <td>{{ item.type }}</td>
+         <td>
+            <div class={{ item.state }}>
+               <img />
+            </div>
+         </td>
       </tr>
+
       {% endfor %}
-  </table>
+   </table>
 
 
 </div>
-        
-  
+
+
 {% endblock %}
