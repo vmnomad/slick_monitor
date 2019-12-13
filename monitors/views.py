@@ -3,8 +3,9 @@ from django.shortcuts import HttpResponse
 from django.shortcuts import redirect,reverse
 from .forms import PingMonitorForm, HttpMonitorForm, SshMonitorForm, TcpMonitorForm, Form_Factory
 from django.contrib.auth.decorators import login_required
-from monitors.models import Monitors
+from monitors.models import Monitors, States
 import json
+
 
 
 # temp view
@@ -23,10 +24,28 @@ def get_form(request, type):
 @login_required
 def dashboard(request):
 
-    query_results = Monitors.objects.values('hostname','type',)
+
+    query_results = Monitors.objects.all()
+
+    display_results = []
+
     for result in query_results:
-        result['state'] = 'circle-red'
-    return render(request, 'monitors_dashboard.html', {'query_results': query_results})
+        
+        if result.states.state == 2:
+            display_state = 'circle-gray'
+        if result.states.state == 1:
+            display_state = 'circle-green'
+        if result.states.state == 0:
+            display_state = 'circle-red'
+
+        display_result = {
+                          'hostname' : result.hostname, 
+                          'type' : result.type, 
+                          'display_state': display_state
+                          }
+        display_results.append(display_result)
+
+    return render(request, 'monitors_dashboard.html', {'query_results': display_results})
 
 @login_required
 def add_form(request):
@@ -82,9 +101,20 @@ def add_monitor(request):
                         alert_type = form['alert_type'],
                         alert_enabled = form['alert_enabled'],
                         params = params)
-        print('saving monitor', type)
+        
+
         try:
             monitor.save()
+            print('successfully saved monitor', monitor)
+        except Exception as err:
+            return render(request, 'error.html', {'error': err})
+
+
+        # TODO delete Monitor
+        try:
+            state = States(monitor=monitor, state=2)
+            state.save()    
+            print('successfully saved state', type)
         except Exception as err:
             return render(request, 'error.html', {'error': err})
     else:
