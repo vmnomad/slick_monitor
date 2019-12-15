@@ -15,7 +15,7 @@
       </tr>
       {% for item in query_results %}
       <tr>
-         <td>{{ item.hostname }}</td>
+         <td><a href="{% url 'edit_monitor' item.id %}">{{ item.hostname }}</a></td>
          <td>{{ item.type }}</td>
          <td>
             <div class={{ item.display_state }}>

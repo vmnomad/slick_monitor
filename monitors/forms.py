@@ -238,7 +238,7 @@ class SshMonitorForm(forms.Form):
     )
 
     # SSH Password
-    regexp = forms.CharField(
+    password = forms.CharField(
         label='Password',
         required = False,
         widget=forms.PasswordInput(
@@ -250,7 +250,7 @@ class SshMonitorForm(forms.Form):
 
     # Monitor Interval
     interval = forms.IntegerField(
-        label='Ping Interval',
+        label='Test Interval',
         required = True,
         widget=forms.NumberInput(
             attrs={

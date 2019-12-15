@@ -5,6 +5,7 @@ from .forms import PingMonitorForm, HttpMonitorForm, SshMonitorForm, TcpMonitorF
 from django.contrib.auth.decorators import login_required
 from monitors.models import Monitors, States
 import json
+from setup.utils import encrypt, decrypt
 
 
 
@@ -39,6 +40,7 @@ def dashboard(request):
             display_state = 'circle-red'
 
         display_result = {
+                          'id' : result.id,
                           'hostname' : result.hostname, 
                           'type' : result.type, 
                           'display_state': display_state
@@ -53,7 +55,41 @@ def add_form(request):
 
 @login_required
 def edit_monitor(request, id):
-    return HttpResponse('Landing page of Edit Monitor')
+
+    # if a GET (or any other method) we'll create a blank form
+    if request.method == 'GET':
+        if Monitors.objects.filter(id=id).exists():
+
+            # get Monitor settings as DICT
+            m = Monitors.objects.filter(id=id).values()[0]
+            type = m['type']
+            
+            
+            params = json.loads(m['params'])
+
+            if type == 'ping':    
+                m['count'] = params['count']
+            elif type == 'http':
+                m['allowed_codes'] = params['allowed_codes']
+                m['regexp'] = params['regexp']
+            elif type == 'tcp':
+                m['port'] = params['port']
+                m['timeout'] = params['timeout']
+            elif type == 'ssh':
+                m['username'] = params['username']
+                m['password'] = params['password']
+                
+            # create and populate form    
+            formFactory = Form_Factory()
+            form = formFactory.create_form(type, m)
+
+            # renders a form using form. Passing ID
+            return render(request, 'edit_monitor.html', {'url_name': 'edit_monitor', 'form': form, 'id': m['id']})
+
+    else:
+        return HttpResponse('Placeholder to update existing monitor')
+
+
 
 @login_required
 def delete_monitor(request, id):
@@ -85,9 +121,8 @@ def add_monitor(request):
             params['port'] = form['port']
             params['timeout'] = form['timeout']
         elif type == 'ssh':
-            params['u'] = form['port']
-            params['timeout'] = form['timeout']
-
+            params['username'] = form['username']
+            params['password'] = encrypt(form['password'])
 
         # stringify params 
         params = json.dumps(params)

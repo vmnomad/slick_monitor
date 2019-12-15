@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row" style="padding-top: 40px; font-size: 13px; font-family: 'Quicksand', sans-serif;">
+        <div class="col col-md-4>"></div>
+        <div class="col col-md-4 text-left">
+    
+                <form action="{% url url_name id %}" method="post"> {% csrf_token %}
+                        {{ form.as_p }}
+                
+                        
+                        <button class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit</button>
+                    </form>
+    
+        </div>
+        <div class="col col-md-4>"></div>
+    </div>
+
+    {% endblock %}
