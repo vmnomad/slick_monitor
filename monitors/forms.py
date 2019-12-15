@@ -240,7 +240,7 @@ class SshMonitorForm(forms.Form):
     # SSH Password
     password = forms.CharField(
         label='Password',
-        required = False,
+        required = True,
         widget=forms.PasswordInput(
             attrs={
                 'placeholder': '********',

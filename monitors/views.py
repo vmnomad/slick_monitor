@@ -8,6 +8,8 @@ import json
 from setup.utils import encrypt, decrypt
 
 
+MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled']
+
 
 # temp view
 def test(request):
@@ -82,18 +84,50 @@ def edit_monitor(request, id):
             # create and populate form    
             formFactory = Form_Factory()
             form = formFactory.create_form(type, m)
-
+            print(form)
             # renders a form using form. Passing ID
             return render(request, 'edit_monitor.html', {'url_name': 'edit_monitor', 'form': form, 'id': m['id']})
 
     else:
-        return HttpResponse('Placeholder to update existing monitor')
+        m = Monitors.objects.get(id=id)
+
+        type = request.POST.get('type')
+        formFactory = Form_Factory()
+        form = formFactory.create_form(type, request.POST)
+
+        if form.is_valid():
+            form = form.cleaned_data.copy()
+            
+            # Update Params
+            params = {}
+            if type == 'ping':
+                params['count'] = form['count']
+            
+            elif type == 'http':
+                if 'allowed_codes' in form:
+                    params['allowed_codes'] = form['allowed_codes']
+                if 'regexp' in form:
+                    params['regexp'] = form['regexp']
+            elif type == 'tcp':
+                params['port'] = form['port']
+                params['timeout'] = form['timeout']
+            elif type == 'ssh':
+                params['username'] = form['username']
+                params['password'] = encrypt(form['password'])
+            # stringify params 
+            params = json.dumps(params)
+            m.params = params
+            
+            # update MUTABLE parameters
+            for p in MUTABLE_PARAMS:
+                setattr(m, p, form[p])
+
+            m.save()
+            return redirect(reverse('dashboard'))
 
 
 
-@login_required
-def delete_monitor(request, id):
-    return HttpResponse('Landing page of Delete Monitor')
+
 
 @login_required
 def add_monitor(request):
@@ -145,7 +179,7 @@ def add_monitor(request):
             return render(request, 'error.html', {'error': err})
 
 
-        # TODO delete Monitor
+        # TODO delete Monitor if adding State fails
         try:
             state = States(monitor=monitor, state=2)
             state.save()    
@@ -157,3 +191,9 @@ def add_monitor(request):
         return render(request, 'error.html', {'error': 'wrong type of monitor'})
 
     return redirect(reverse('dashboard'))
+
+
+
+@login_required
+def delete_monitor(request, id):
+    return HttpResponse('Landing page of Delete Monitor')
