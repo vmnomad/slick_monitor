@@ -27,7 +27,6 @@ def get_form(request, type):
 @login_required
 def dashboard(request):
 
-
     query_results = Monitors.objects.all()
 
     display_results = []
@@ -84,17 +83,25 @@ def edit_monitor(request, id):
             # create and populate form    
             formFactory = Form_Factory()
             form = formFactory.create_form(type, m)
-            print(form)
+
+            # lock down Hostname attribute of the form
+            form.fields['hostname'].widget.attrs['readonly']= 'readonly'
+
             # renders a form using form. Passing ID
             return render(request, 'edit_monitor.html', {'url_name': 'edit_monitor', 'form': form, 'id': m['id']})
 
     else:
+        # get monitor params from DB
         m = Monitors.objects.get(id=id)
 
+        # get monitor type
         type = request.POST.get('type')
+
+        # generate form using form type and form payload
         formFactory = Form_Factory()
         form = formFactory.create_form(type, request.POST)
 
+        # use form data to update and save monitor
         if form.is_valid():
             form = form.cleaned_data.copy()
             
@@ -124,8 +131,6 @@ def edit_monitor(request, id):
 
             m.save()
             return redirect(reverse('dashboard'))
-
-
 
 
 
