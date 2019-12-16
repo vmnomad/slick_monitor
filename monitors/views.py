@@ -131,6 +131,8 @@ def edit_monitor(request, id):
 
             m.save()
             return redirect(reverse('dashboard'))
+        else:
+            print(form.errors)
 
 
 

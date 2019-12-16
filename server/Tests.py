@@ -62,7 +62,6 @@ class Http_test(Test):
     def __init__(self, config):
         super().__init__(config)
         self.normalize_url(self.hostname)
-        print('Params:', type(config.params))
         if config.params['allowed_codes'] is not None:
             self.allowed_codes = config.params['allowed_codes']
         else:
@@ -102,9 +101,11 @@ class Http_test(Test):
                         Ping_test.set_result(monitor, 'fail', 'Failed to find regexp {} on {}'.format(self.regexp_text, self.hostname))
 
         except requests.ConnectionError as er:
-            monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)
-            monitor.failed +=1
-            monitor.status = False
+            Ping_test.set_result(monitor, 'fail', 'Failed to connect to {}, error: {} '.format(self.hostname , er))
+            #tests_logger(er.errno)
+            #monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)
+            #monitor.failed +=1
+            #monitor.status = False
 
 class Ssh_test(Test):
     def __init__(self, config):

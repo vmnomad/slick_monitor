@@ -15,7 +15,7 @@ def get_alert_types():
     ALERT_TYPES = []
     for al in alerts:
         for k,v in al.items():
-            alert_type = (v.capitalize(), v)
+            alert_type = (v, v.capitalize())
             ALERT_TYPES.append(alert_type)
     if len(ALERT_TYPES) == 0:
         ALERT_TYPES.append(('n/a', 'n/a'))

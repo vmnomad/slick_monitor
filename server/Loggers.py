@@ -7,15 +7,21 @@ from queue import Queue
 import builtins
 from logging.handlers import QueueHandler
 from colorlog import ColoredFormatter
+import os
 
 
 COLOR_LOGGING_FORMAT = ColoredFormatter(' %(asctime)s | %(log_color)s%(levelname)-5s%(reset)s | %(module)-7s | %(log_color)s%(message)s%(reset)s')
 LOGGING_FORMAT = logging.Formatter(' %(asctime)s - %(levelname)s - %(message)s - %(module)s')
 
 
+# Database Name
+db_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+db_name = 'slick_monitor_db.sqlite3'
+DB_PATH = os.path.join(db_folder, db_name)
+
 def get_logging_config():
 
-    conn = sqlite3.connect('server.db', timeout=5.0)
+    conn = sqlite3.connect(DB_PATH, timeout=5.0)
     conn.row_factory = sqlite3.Row
     cursor = conn.execute("SELECT * from LOGGERS")
     result = cursor.fetchall()

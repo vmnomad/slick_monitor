@@ -16,6 +16,7 @@ import sys
 import os
 import Loggers
 
+
 # Database Name
 db_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 db_name = 'slick_monitor_db.sqlite3'
@@ -32,7 +33,7 @@ MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled', 'params']
 
 def load_alerts():
     try:
-        conn = sqlite3.connect('server.db', timeout=5.0)
+        conn = sqlite3.connect(DB_PATH, timeout=5.0)
         conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * from ALERTS")
         result = cursor.fetchall()
@@ -43,6 +44,7 @@ def load_alerts():
         return alerts
     except Exception as error:
         utils_logger.error('Failed to load alerts configuration. Error: {}'.format(error))
+
 def get_key():
     key = os.getenv('MONITOR_KEY')
     return key
@@ -228,7 +230,7 @@ class State_manager(Thread):
         while True:
             try:
                 # open DB connection
-                conn = sqlite3.connect('server.db')
+                conn = sqlite3.connect(DB_PATH)
 
                 # reset STATES table
                 conn.execute('DELETE FROM STATES')
