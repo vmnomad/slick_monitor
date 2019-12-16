@@ -10,7 +10,6 @@ import os
 from logging.handlers import  QueueListener
 
 
-
 # local modulues
 from Utils import Stats, Thread_manager, State_manager, load_monitors, load_alerts
 from Alerts import Alert_Factory

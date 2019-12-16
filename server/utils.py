@@ -17,7 +17,9 @@ import os
 import Loggers
 
 # Database Name
-DB_NAME = 'server.db'
+db_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+db_name = 'slick_monitor_db.sqlite3'
+DB_PATH = os.path.join(db_folder, db_name)
 
 # Color for Stats logging
 COLOR = 'yellow'
@@ -67,7 +69,7 @@ def decrypt(secret):
 
 def load_monitors():
     try:
-        conn = sqlite3.connect(DB_NAME, timeout=5.0)
+        conn = sqlite3.connect(DB_PATH, timeout=5.0)
         conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * from MONITORS")
         result = cursor.fetchall()
@@ -76,7 +78,8 @@ def load_monitors():
         monitors = [dict(row) for row in result]
 
         for i in range(len(monitors)):
-            monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
+            #monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
+            monitors[i]['params'] = json.loads(monitors[i]['params'])
         conn.close()
         return monitors
     except Exception as error:
