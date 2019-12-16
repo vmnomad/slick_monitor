@@ -198,7 +198,8 @@ def add_monitor(request):
     return redirect(reverse('dashboard'))
 
 
-
 @login_required
 def delete_monitor(request, id):
-    return HttpResponse('Landing page of Delete Monitor')
+    m = Monitors.objects.get(id=id)
+    m.delete()
+    return redirect(reverse('dashboard'))
