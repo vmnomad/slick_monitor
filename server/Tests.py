@@ -102,10 +102,7 @@ class Http_test(Test):
 
         except requests.ConnectionError as er:
             Ping_test.set_result(monitor, 'fail', 'Failed to connect to {}, error: {} '.format(self.hostname , er))
-            #tests_logger(er.errno)
-            #monitor.result_info = 'Failed to connect to {}, error: {} '.format(self.hostname , er)
-            #monitor.failed +=1
-            #monitor.status = False
+
 
 class Ssh_test(Test):
     def __init__(self, config):

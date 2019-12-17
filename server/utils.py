@@ -80,9 +80,9 @@ def load_monitors():
         monitors = [dict(row) for row in result]
 
         for i in range(len(monitors)):
-            #monitors[i]['params'] = ast.literal_eval(monitors[i]['params'])
             monitors[i]['params'] = json.loads(monitors[i]['params'])
         conn.close()
+        
         return monitors
     except Exception as error:
         sys.exit('Failed to load monitors. Error: {}'.format(error))

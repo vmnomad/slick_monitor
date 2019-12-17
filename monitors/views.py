@@ -27,28 +27,36 @@ def get_form(request, type):
 @login_required
 def dashboard(request):
 
+    
     query_results = Monitors.objects.all()
+    print(query_results)
+    if len(query_results) > 0:
 
-    display_results = []
-
-    for result in query_results:
+        display_results = []
         
-        if result.states.state == 2:
-            display_state = 'circle-gray'
-        if result.states.state == 1:
-            display_state = 'circle-green'
-        if result.states.state == 0:
-            display_state = 'circle-red'
+        for result in query_results:
+            
+            if result.states.state == 2:
+                display_state = 'circle-gray'
+            if result.states.state == 1:
+                display_state = 'circle-green'
+            if result.states.state == 0:
+                display_state = 'circle-red'
 
-        display_result = {
-                          'id' : result.id,
-                          'hostname' : result.hostname, 
-                          'type' : result.type, 
-                          'display_state': display_state
-                          }
-        display_results.append(display_result)
+            display_result = {
+                            'id' : result.id,
+                            'hostname' : result.hostname, 
+                            'type' : result.type, 
+                            'display_state': display_state
+                            }
+            display_results.append(display_result)
 
-    return render(request, 'monitors_dashboard.html', {'query_results': display_results})
+        return render(request, 'monitors_dashboard.html', {'query_results': display_results})
+    else:
+        display_results = 'No configured monitors'
+        return render(request, 'monitors_dashboard.html', {'message': display_results})
+
+
 
 @login_required
 def add_form(request):
@@ -192,6 +200,7 @@ def add_monitor(request):
             state.save()    
             print('successfully saved state', type)
         except Exception as err:
+            monitor.delete()
             return render(request, 'error.html', {'error': err})
     else:
         print(form.errors)
@@ -202,6 +211,6 @@ def add_monitor(request):
 
 @login_required
 def delete_monitor(request, id):
-    m = Monitors.objects.get(id=id)
-    m.delete()
+    monitor = Monitors.objects.get(id=id)
+    monitor.delete()
     return redirect(reverse('dashboard'))
