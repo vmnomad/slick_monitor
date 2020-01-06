@@ -16,6 +16,9 @@ import sys
 import os
 import Loggers
 
+import Monitor
+
+
 
 # Database Name
 db_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -200,7 +203,7 @@ class Thread_manager(Thread):
                 # check if it is started
                 if not monitor['id'] in thread_ids:
                     utils_logger.info(colored('Starting new thread for {}'.format(monitor['hostname']), 'red'))
-                    new_thread = Monitor_test(monitor)
+                    new_thread = Monitor.Monitor_test(monitor)
                     self.threads.append(new_thread)
                     new_thread.start()
 
