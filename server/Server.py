@@ -97,6 +97,6 @@ while True:
             main_logger.info(colored('{}'.format(message), 'red'))
     
     time.sleep(2)
-
+    raise Exception("Oh oh, this script just died")
 listener.stop()
 
