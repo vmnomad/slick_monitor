@@ -163,7 +163,10 @@ def add_monitor(request):
             
         elif type == 'http':
             if 'allowed_codes' in form:
-                params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')]  #form['allowed_codes']
+                if form['allowed_codes'] != '':
+                    params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')]  #form['allowed_codes']
+                else:
+                    params['allowed_codes'] = []
             if 'regexp' in form:
                 params['regexp'] = form['regexp']
         elif type == 'tcp':

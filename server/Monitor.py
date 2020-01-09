@@ -52,19 +52,21 @@ class Monitor_test(Thread):
             # creating Alert
             #  TODO check if the alert config changed before recreating test obj  
             #  TODO if the alert hasn't changed no need to instantiate Test class              
-            alertObj = Alerts.Alert_Factory()
-            alert = alertObj.create_alert(self.alert_type)
+
 
             # sending Alert if needed
-            if self.alert_enabled == 1:
+            if self.alert_enabled == 1 and self.alert_type != 'n/a':
                 try:
+                    alertObj = Alerts.Alert_Factory()
+                    alert = alertObj.create_alert(self.alert_type)
+
                     if self.failed >= self.ftt:
                         self.last_fail = datetime.datetime.now()
                         alert.fail(self)
                 except Exception as er:
                     monitor_logger.exception('Failed to send alert. Error: {}, Object: {}'.format(er, self))
             else:
-                monitor_logger.info('Alert is disabled for monitor: {} / {}'.format(self.hostname, self.type))
+                monitor_logger.warn('Alert is disabled or not configured for monitor: {} / {}'.format(self.hostname, self.type))
 
             # passing result data to queue
             test_result = [self.status, self.result_info]

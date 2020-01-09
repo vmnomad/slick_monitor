@@ -62,7 +62,8 @@ class Http_test(Test):
     def __init__(self, config):
         super().__init__(config)
         self.normalize_url(self.hostname)
-        if config.params['allowed_codes'] is not None:
+        print('Length:', len(config.params['allowed_codes']))
+        if len(config.params['allowed_codes']) != 0:
             self.allowed_codes = config.params['allowed_codes']
         else:
             self.allowed_codes = [200]
