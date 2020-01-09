@@ -38,7 +38,7 @@ class Ping_test(Test):
     def __init__(self, config):
         super().__init__(config)
         self.count = config.params['count']
-        self.cmd = 'ping -c {} -t 2 {}'.format(self.count, self.hostname).split(' ')
+        self.cmd = 'ping -c {} -w 2 {}'.format(self.count, self.hostname).split(' ')
 
     # function to get avg response time from the ping outpu
     @staticmethod

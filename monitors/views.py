@@ -79,7 +79,7 @@ def edit_monitor(request, id):
             if type == 'ping':    
                 m['count'] = params['count']
             elif type == 'http':
-                m['allowed_codes'] = params['allowed_codes']
+                m['allowed_codes'] =  ','.join([str(char) for char in params['allowed_codes']]) #params['allowed_codes']
                 m['regexp'] = params['regexp']
             elif type == 'tcp':
                 m['port'] = params['port']
@@ -120,7 +120,7 @@ def edit_monitor(request, id):
             
             elif type == 'http':
                 if 'allowed_codes' in form:
-                    params['allowed_codes'] = form['allowed_codes']
+                    params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')]  #form['allowed_codes']
                 if 'regexp' in form:
                     params['regexp'] = form['regexp']
             elif type == 'tcp':
@@ -163,7 +163,7 @@ def add_monitor(request):
             
         elif type == 'http':
             if 'allowed_codes' in form:
-                params['allowed_codes'] = form['allowed_codes']
+                params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')]  #form['allowed_codes']
             if 'regexp' in form:
                 params['regexp'] = form['regexp']
         elif type == 'tcp':

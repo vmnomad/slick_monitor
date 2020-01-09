@@ -133,10 +133,10 @@ class HttpMonitorForm(forms.Form):
     )
 
     # Allowed HTTP Code
-    allowed_codes = forms.IntegerField(
+    allowed_codes = forms.CharField(
         label='Allowed HTTP code',
         required = False,
-        widget=forms.NumberInput(
+        widget=forms.TextInput(
             attrs={
                 'placeholder': '200',
                 'class' : 'form-control'

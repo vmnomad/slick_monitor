@@ -103,13 +103,14 @@ class Stats(Thread):
 
     def find_pid(self):
         try:
-            output = subprocess.run(['ps'], stdout = subprocess.PIPE)
+            output = subprocess.run(['ps','-eo', 'pid,args'], stdout = subprocess.PIPE)
         except Exception as er:
             utils_logger.error('failed to capture PID of {}, Error: {}'.format(self.name, er))
 
         output = output.stdout.decode('utf-8')
         output = output.strip(' ').split('\n')
         for line in output:
+            #print(line)
             if self.name in line:
                 return line.strip(' ').split(' ')[0]
         raise Exception('Failed to find PID for program {}'.format(self.name))
