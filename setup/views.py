@@ -11,13 +11,23 @@ from setup.models import Alerts, Loggers
 
 # Create your views here.
 def default(request):
-    if(authenticate(username='admin', password='VMware1!')):
-        return render(request, 'change_password.html')
+    user = User.objects.filter(username='admin')
+    if len(user) == 0:
+        return redirect(reverse('set_password'))
     else:
         if request.user.is_authenticated:
             return redirect(reverse('dashboard'))
         else:
             return redirect(reverse('login'))
+
+def set_password(request):
+    if request.method == 'GET':
+        return render(request, 'set_password.html')
+    else:
+        new_password = request.POST.get('inputPassword1')
+        user = User.objects.create_user(username='admin', password=new_password)
+        user.save()
+    return redirect(reverse('default'))
 
 @login_required
 def change_password(request):
@@ -207,6 +217,7 @@ def loggers_console(request):
             template_data['form']  = ConsoleLoggingForm()
             return render(request, 'loggers_form.html', template_data)
 
+@login_required
 def loggers_netcat(request):
     logger_type = 'netcat'
     template_data = {'url_name' : logger_type}
@@ -252,6 +263,7 @@ def loggers_netcat(request):
             template_data['form']  = NetcatLoggingForm()
             return render(request, 'loggers_form.html', template_data)
 
+@login_required
 def loggers_file(request):
     logger_type = 'file'
     template_data = {'url_name' : logger_type}

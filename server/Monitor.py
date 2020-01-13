@@ -68,10 +68,6 @@ class Monitor_test(Thread):
             else:
                 monitor_logger.warn('Alert is disabled or not configured for monitor: {} / {}'.format(self.hostname, self.type))
 
-            # passing result data to queue
-            test_result = [self.status, self.result_info]
-            #queue.put(test_result)
-
             # improved wait timer for quicker thread stop
             wait = 0
             while wait < self.interval:

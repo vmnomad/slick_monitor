@@ -11,6 +11,7 @@ urlpatterns = [
     path(r'loggers_netcat/', views.loggers_netcat, name='netcat'),
     path(r'loggers_file/', views.loggers_file, name='file'),
     path(r'change_password/', views.change_password, name='change_password'),
+    path(r'set_password/', views.set_password, name='set_password'),
     path(r'login/', views.my_login, name='login'),
     path(r'logout/', views.my_logout, name='logout'),
 ]

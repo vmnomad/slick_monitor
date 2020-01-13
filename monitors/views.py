@@ -7,8 +7,21 @@ from monitors.models import Monitors, States
 import json
 from setup.utils import encrypt, decrypt
 
+from setup.models import Alerts
+
 
 MUTABLE_PARAMS = ['interval', 'ftt', 'alert_type', 'alert_enabled']
+
+def get_alert_types():
+    alerts = Alerts.objects.values('type')
+    ALERT_TYPES = []
+    for al in alerts:
+        for k,v in al.items():
+            alert_type = (v, v.capitalize())
+            ALERT_TYPES.append(alert_type)
+    if len(ALERT_TYPES) == 0:
+        ALERT_TYPES.append(('n/a', 'n/a'))
+    return ALERT_TYPES
 
 
 # temp view
@@ -21,6 +34,9 @@ def get_form(request, type):
 
     formFactory = Form_Factory()
     form = formFactory.create_form(type)
+
+    form.fields['alert_type'].widget.choices = get_alert_types() #attrs['readonly']= 'readonly'
+
     return render(request, 'monitor_form.html', {'url_name': 'add_monitor', 'form': form})
 
 # Create your views here.
@@ -53,7 +69,7 @@ def dashboard(request):
 
         return render(request, 'monitors_dashboard.html', {'query_results': display_results})
     else:
-        display_results = 'No configured monitors'
+        display_results = 'No configured monitors. Configure Alerts and Monitors'
         return render(request, 'monitors_dashboard.html', {'message': display_results})
 
 
@@ -94,6 +110,9 @@ def edit_monitor(request, id):
 
             # lock down Hostname attribute of the form
             form.fields['hostname'].widget.attrs['readonly']= 'readonly'
+
+            # update the list of available alerts
+            form.fields['alert_type'].widget.choices = get_alert_types()
 
             # renders a form using form. Passing ID
             return render(request, 'edit_monitor.html', {'url_name': 'edit_monitor', 'form': form, 'id': m['id']})
@@ -164,7 +183,7 @@ def add_monitor(request):
         elif type == 'http':
             if 'allowed_codes' in form:
                 if form['allowed_codes'] != '':
-                    params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')]  #form['allowed_codes']
+                    params['allowed_codes'] = [int(x) for x in form['allowed_codes'].split(',')] 
                 else:
                     params['allowed_codes'] = []
             if 'regexp' in form:
