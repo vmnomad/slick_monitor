@@ -23,6 +23,7 @@ import Monitor
 # Database Name
 db_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 db_name = 'slick_monitor_db.sqlite3'
+key_file = '/slick_monitor/monitor.key'
 DB_PATH = os.path.join(db_folder, db_name)
 
 # Color for Stats logging
@@ -49,7 +50,7 @@ def load_alerts():
         utils_logger.error('Failed to load alerts configuration. Error: {}'.format(error))
 
 def get_key():
-    key = os.getenv('MONITOR_KEY')
+    key = open(key_file).read()
     return key
 
 # takes key as byte literal and secret as string

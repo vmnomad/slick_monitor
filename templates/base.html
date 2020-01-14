@@ -80,10 +80,6 @@
                         <a class="nav-link" href="{% url 'add_form' %}">Add Monitor</a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'change_password' %}">Change Pass</a>
-                    </li>
-
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -92,11 +88,12 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="{% url 'alerts' %}">Alerts</a>
                             <a class="dropdown-item" href="{% url 'loggers' %}">Loggers</a>
+                            <a class="dropdown-item" href="{% url 'change_password' %}">Change Password</a>
                         </div>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
 
                     {% endif %}

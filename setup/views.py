@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 import json
 from .forms import EmailAlertForm, SlackAlertForm, ConsoleLoggingForm, FileLoggingForm, NetcatLoggingForm
 from .utils import encrypt, decrypt
+import os
 
 from setup.models import Alerts, Loggers
 
@@ -125,6 +126,7 @@ def alerts_email(request):
 @login_required
 def alerts_slack(request):
     if request.method == 'POST':
+        print('key is ', os.getenv('MONITOR_KEY'))
         # create a form instance and populate it with data from the request:
         form = SlackAlertForm(request.POST)
         print(request.POST.values)

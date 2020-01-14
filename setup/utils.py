@@ -1,11 +1,12 @@
 from cryptography.fernet import Fernet
 import os
 
+key_file = '/slick_monitor/monitor.key'
 
 def get_key():
-    key = os.getenv('MONITOR_KEY')
+    key = open(key_file).read()
     return key
-
+    
 
 def encrypt(secret):
     key = get_key()

@@ -46,7 +46,7 @@ class Email_alert(Alert):
             message['To'] = self.to_addr
             message['Subject'] = "[%s] Monitor %s Failed!" % (monitor.hostname, monitor.type)
             
-            body = """Monitor %s%s has failed.
+            body = """Monitor %s %s has failed.
 Failed at: %s
 Error Info: %s """ % (
                 monitor.hostname,

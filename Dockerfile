@@ -5,6 +5,5 @@ COPY requirements.txt /slick_monitor
 RUN pip install -r requirements.txt
 RUN apt-get update && apt-get -y install procps iputils-ping
 COPY . /slick_monitor
-ENV MONITOR_KEY='UpdateMe'
 RUN chmod +x entrypoint.sh
 CMD ./entrypoint.sh
